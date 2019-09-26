@@ -1,0 +1,74 @@
+exit
+PING
+DBSIZE
+SET testkey hello
+EXISTS testkey
+TYPE testkey
+KEYS *
+DELT testkey
+DEl testkey
+EXISTS testkey
+TYPE testkey
+SCAN 0
+SCAN 0 MATCH 'hell*'
+SET Book:1 "Infinite Jest"
+GET Book:1
+SET Book:1.ReadAction 1
+GET Book:1:ReadAction
+SET Book:1:ReadAction 1
+GET Book:1:ReadAction
+INCR Book:1:ReadAction
+GET Book:1:ReadACtion
+GET Book:1:ReadAction
+Get Book:1:ReadAction
+DECR Book:1:ReadAction
+INCRBY Book:1:ReadAction 20
+DECRBY Book:1:ReadAction 5
+INCR Book:1 "Infinite Jest"
+MSET Person:2 "Kurt" Person:3 "Jane" Person:4 "Mark"
+MGET Person:2
+LPUSH Book:1:comment "Wow"
+LRANGE Book:1:comment 0 -1
+LPUSH Book:1:comment "Lmao"
+LRANGE Book:1:comment 0 -1
+RPUSH Book:1:comment "Ayyy"
+LRANGE Book:1: comment 0 -1
+LRANGE Book:1:comment 0 -
+LRANGE Book:1:comment 0 -2
+LPOP Book:1:comment
+LRange Book:1:comment 0 -1
+RPUSH Organization:1:members Person:1 Person:2 Person:3
+LRANGE Organization:1:members 0 -1
+LTRIM Organization:1:members 0 2
+LRANGE Organization:1:members 0 -1
+RPUSH Organization:1:members Person:4
+LRANGE Organization:1:members 0 -1
+LTRIM Organization:1:members 0 2
+LRANGE Organization:1:members 0 -1
+BRPOP Organization:1:members 5
+LRANGE Organization:1:members 0 -1
+HSET Book:3 name "Cats Cradle"
+HGET Book:3 name
+HMSET Book:4 name "Slaughterhouse" author "me"
+HMGET Book:4 author ISBN
+HMSET Book:4 name "Slaughterhouse" author "me" copyrightYear 69 ISBN 420
+HMGET Book:4 author ISBN
+HEXISTS Book:4 copyrightYear
+HEXISTS Book:4 poop
+HLEN Book:4
+HKEYS Book:4
+HDEL Book:4 copyrightYear
+HGETALL Book:4
+HSET Book:4 copyrightYear 420
+HGET Book:4 copyrightYear
+SET Organization:5 "Beatles"
+SADD Organization:5:member Paul John Gringo Reorge
+SMEMBERS Organization:5:member
+INCR Book:1 "Infinite Jest"
+INCR Book:1 
+LINDEX Book:1:comment
+LINDEX Book:1:comment 2
+LINDEX Book:1:comment 1
+LINDEX Book:1:comment 0
+exit
+
