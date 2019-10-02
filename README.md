@@ -6,4 +6,4 @@
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/heroufenix/cbd/blob/master/LICENSE) file for deta
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/heroufenix/cbd/blob/master/LICENSE) file for more information
