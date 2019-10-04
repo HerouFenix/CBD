@@ -132,3 +132,33 @@ Returns all values in given key
 Delete a given field inside the key
 #### HINCRBY key field value
 Increases the integer value of a hash field's value by a given number.
+
+# Mass Insertion
+Redis has a very kewl function that allows you to do mass insertion of data read from a file. The command used to do so is:
+```
+sudo cat initials4redis.txt | redis-cli --pipe
+```
+
+You might wanna treat data before feeding it, for example using a small python (or whatever you might prefer) program to insert data into a text file that can then be fed into redis. For example:
+```
+name_counter = {} #Dictionary that stores, as keys, the initial letters of each name and as values the total amount of names that start with that letter
+
+with open("female-names.txt","r") as reader: #Add data to name_counter
+    for line in reader:
+        if line[0].upper() not in name_counter:
+            name_counter[line[0].upper()] = 0
+
+        name_counter[line[0].upper()] += 1
+
+with open("initials4redis.txt","w") as writer:
+    for key, value in name_counter.items():
+        writer.write(f" SET {key} {value}\n")
+```
+
+More info can be found over at https://redis.io/topics/mass-insert
+
+# Programatic Access to Redis
+
+Support for using Redis with (virtually) any programming language can be found over at https://redis.io/clients
+Personally, I used https://pypi.org/project/redis/
+Documentation over at: https://redis-py.readthedocs.io/en/latest/index.html#redis.Redis.hgetall
