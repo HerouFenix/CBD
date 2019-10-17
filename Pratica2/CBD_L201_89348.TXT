@@ -1,0 +1,116 @@
+> use testDB
+switched to db testDB
+
+> db
+testDB
+
+> show dbs
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+
+
+> db.dropDatabase()
+
+> use testDB
+switched to db testDB
+
+> db.createCollection("testcollection")
+{  "ok"  :  1  }
+
+> show collections
+testcollection
+
+> show dbs
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+testDB  0.000GB
+
+>db.testcollection.drop()
+true
+
+> db.testcollection.insert({
+   _id: 0,
+   name: 'DS', 
+   description: 'Hey demons, it\'s me, ya boi',
+   team: "Pirocanhoes"
+})
+Inserted 1 record(s) in 7ms
+
+> db.testcollection.insert([
+   {_id: 1,
+    name: 'André Baião', 
+    description: 'Acoreano',
+    team: "Pirocanhoes"},
+    {_id: 2,
+    name: 'Chico com Ch', 
+    description: 'Minimeu',
+    team: "FTW"}
+    ])
+Inserted 1 record(s) in 3ms
+
+> db.testcollection.find()
+{ "_id" : 0, "name" : "DS", "description" : "Hey demons, it's me, ya boi", "team": "Pirocanhoes" }
+{ "_id" : 1, "name" : "André Baião", "description" : "Acoriano", "team": "Pirocanhoes" }
+{ "_id" : 2, "name" : "Chico com Ch", "description" : "Minimeu", "team": "FTW" }
+
+> db.testcollection.find().pretty()
+{ "_id" : 0, "name" : "DS", "description" : "Hey demons, it's me, ya boi", "team": "Pirocanhoes" }
+{
+	"_id" : 1,
+	"name" : "André Baião",
+	"description" : "Acoriano"
+	"team": "Pirocanhoes"
+}
+{
+	"_id" : 2,
+	"name" : "Chico com Ch",
+	"description" : "Minimeu"
+	"team": "FTW"
+}
+
+>db.testcollection.find({"_id":0})
+{ "_id" : 0, "name" : "DS", "description" : "Hey demons, it's me, ya boi", "team": "Pirocanhoes" }
+
+>db.testcollection.find({"name": "Chico com Ch"})
+{ "_id" : 2, "name" : "Chico com Ch", "description" : "Minimeu", "team": "FTW" }
+
+> db.testcollection.find({$or: [{team: "Pirocanhoes"},{team: "FTW"}]})
+{ "_id" : 0, "name" : "DS", "description" : "Hey", "team" : "Pirocanhoes" }
+{ "_id" : 1, "name" : "Andre", "description" : "acoreano", "team" : "Pirocanhoes" }
+{ "_id" : 2, "name" : "Chico", "description" : "minimeu", "team" : "FTW" }
+
+> db.testcollection.find({$and: [{team: "Pirocanhoes"},{name: "DS"}]})
+{ "_id" : 0, "name" : "DS", "description" : "Hey", "team" : "Pirocanhoes" }
+
+> db.testcollection.find({"_id": {$gt: 0}}) #Find all documents which have an ID field greater than 0
+{ "_id" : 1, "name" : "Andre", "description" : "acoreano", "team" : "Pirocanhoes" }
+{ "_id" : 2, "name" : "Chico", "description" : "minimeu", "team" : "FTW" }
+
+> db.testcollection.find({"_id": {$ne: 1}})
+{ "_id" : 0, "name" : "DS", "description" : "Hey", "team" : "Pirocanhoes" }
+{ "_id" : 2, "name" : "Chico", "description" : "minimeu", "team" : "FTW" }
+
+> db.testcollection.update({'name':'Chico'},{$set:{'team':'Pirocanhoes'}})
+Updated 1 existing record(s) in 5ms
+
+> db.testcollection.update({'_id':{$gte: 0}}, {$set:{'description':'Winner of the DETIgameroom'}},{multi:true})
+Updated 3 existing record(s) in 23ms
+
+> db.testcollection.save({"_id" : 2, "name":"Rafa Simoes", "description": "MongoDB Creator", "team": "Pirocanhoes"})
+Updated 1 existing record(s) in 1ms
+
+> db.testcollection.remove({'name':'Rafa Simoes'})
+Removed 1 record(s) in 2ms
+
+> db.testcollection.remove({'team':'Pirocanhoes'},1)
+Removed 1 record(s) in 1ms
+
+> db.testcollection.ensureIndex({"name":1})
+{
+	"createdCollectionAutomatically" : true,
+	"numIndexesBefore" : 1,
+	"numIndexesAfter" : 2,
+	"ok" : 1
+}
