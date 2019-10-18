@@ -1,5 +1,45 @@
 ﻿# Prática CBD - 2
 
+# Index
+- [Initial Configurations](#initial-configurations)
+ - [Using Robo3T](#using-robo3t)
+ - [Initial MongoDB Interactions](#initial-mongodb-interactions)
+	 - [Storage Structures](#storage-structures)
+		 - [Database](#database)
+		 - [Collections](#collections)
+		 - [Documents](#documents)
+	- [Storage Structures](#storage-structures)
+		 - [Database](#database)
+		 - [Collections](#collections)
+		 - [Documents](#documents)
+	- [Some Commands](#some-commands)
+		 - [Database Commands](#database-commands)
+			 - [Creating a Database](#creating-a-database)
+			 - [Checking what the current Database is](#checking-what-the-current-database-is)
+			 - [Viewing all Databases](#viewing-all-databases)
+			 - [Dropping a Database](#dropping-a-database)
+		 - [Collection Commands](#collections-commands)
+			 - [Creating a Collection](#creating-a-collection)
+			 - [Viewing all Collections](#viewing-all-collections)
+			 - [Dropping a Collection](#dropping-a-collection)
+		 - [Document Commands](#document-commands)			 
+			 - [Insert a Document](#insert-a-document)
+			 - [Query a Document](#query-a-document)
+			 - [Update a Document](#update-a-document)
+			 - [Delete a Document](#delete-a-document)
+	- [Types & Arrays](#types-and-arrays)
+		- [Types](#types)
+		- [Arrays](#arrays)
+	- [Aggregations & Mapreduces](#aggregations-and-mapreduces)
+		- [Aggregations](#aggregations)
+			- [Aggregate Functions Table](#aggregate-functions-table)
+			- [Pipeline Stages](#pipeline-stages)
+		- [Mapreduces](#mapreduces)
+ - [Query Construction](#query-construction)
+	 - [Setup](#setup)
+	 - [Exercises](#exercises)
+		
+
 # Initial Configurations
 Checkout https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/
 
@@ -54,6 +94,8 @@ Basically:
 -	A server contains multiple Databases, which in turn have several Collections that possess some Documents.
 
 -	Making an analogy with non-document oriented databases, **Collections** correspond to **Tables**, whilst **Documents** correspond to **Tuples/Rows**, in which each of the Document's **Fields** are the **Columns**
+
+## Some Commands
 
 ### Database Commands:
 #### Creating a Database
@@ -143,6 +185,7 @@ In regards to the **save()** method:
 > To insert the document you can use **db.post.save(document)** also. If you don't specify **_id** in the document then **save()** method will work same as **insert()** method. If you specify _id then it will replace whole data of document containing _id as specified in save() method.
 
 #### Query a Document
+##### Query All Documents in collection
 To query data from MongoDB collection, you need to use MongoDB's **find()** method.
 ```
 > db.testcollection.find()
@@ -168,6 +211,7 @@ You can also use the **prety()** method to format the way the query gets display
 	"team": "FTW"
 }
 ```
+##### Query for a specific Document in the collection
 To search for a specific Document, you can just put one of the document's fields in the find() method, like so:
 ```
 >db.testcollection.find({"_id":0})
@@ -177,6 +221,23 @@ To search for a specific Document, you can just put one of the document's fields
 { "_id" : 2, "name" : "Chico com Ch", "description" : "Minimeu", "team": "FTW" }
 ```
 
+##### Output only SOME fields 
+If you only want to show **SOME** of the fields you can use the find() method like so:
+```
+> db.testcollection.find({}, {name: 1, team: 1})
+{ "_id" : 0, "name" : "DS","team": "Pirocanhoes" }
+{ "_id" : 1, "name" : "André Baião", "team": "Pirocanhoes" }
+{ "_id" : 2, "name" : "Chico com Ch", "team": "FTW" }
+```
+And if instead of including the fields you want to **exclude them** all you've gotta do is change that 1 to a 0
+```
+> db.testcollection.find({}, {description: 0})
+{ "_id" : 0, "name" : "DS","team": "Pirocanhoes" }
+{ "_id" : 1, "name" : "André Baião", "team": "Pirocanhoes" }
+{ "_id" : 2, "name" : "Chico com Ch", "team": "FTW" }
+```
+
+##### Pass multiple keys
 You can also pass multiple keys and mix them with **AND** and/or **OR** like so:
 ```
 > db.testcollection.find({$or: [{team: "Pirocanhoes"},{team: "FTW"}]})
@@ -188,6 +249,7 @@ You can also pass multiple keys and mix them with **AND** and/or **OR** like so:
 { "_id" : 0, "name" : "DS", "description" : "Hey", "team" : "Pirocanhoes" }
 ```
 
+##### Query by comparassion
 There are also commands for querying **Greater than**, **Lesser than**, **Not Equals**, etc etc
 
 As a couple of examples, you can have:
@@ -246,7 +308,7 @@ Removed 1 record(s) in 2ms
 Removed 1 record(s) in 1ms
 ```
 
-## Types & Arrays
+## Types and Arrays
 ### Types
 MongoDB supports many datatypes, which includes:
 
@@ -317,7 +379,7 @@ The ensureIndex() method also accepts list of options (which are optional). To c
 }
 ```
 
-## Aggregations & Mapreduces
+## Aggregations and Mapreduces
 
 ### Aggregations
 
@@ -362,8 +424,6 @@ Imagine we want to display a list stating **how many tutorials are written by ea
 > db.mycol.aggregate([{$group :  {_id :  "$by_user", num_tutorial :  {$sum :  1}}}]) 
 {  "result"  :  [  {  "_id"  :  "tutorials point",  "num_tutorial"  :  2  },  {  "_id"  :  "Neo4j",  "num_tutorial"  :  1  }  ],  "ok"  :  1  }
 ```
-
-
 
 #### Aggregate Functions Table
 -	**$sum**
@@ -414,6 +474,15 @@ Imagine we want to display a list stating **how many tutorials are written by ea
 	-	Gets the last document from the source documents according to the grouping. Typically this makes only sense together with some previously applied “$sort”-stage.
 
 	-	`db.mycol.aggregate([{$group : {_id : "$by_user", last_url : {$last : "$url"}}}])`
+
+
+#### Pipeline Stages
+In Aggregations we have one (or several) pipeline stages, in which we're querying data. The execution of the aggregate function passes through each stage IN ORDER and does whatever it has to do. The full list can be found at https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/.
+
+So in the end, we have the syntax:
+**db.collection.aggregate( [ {PIPELINE_STAGE_1}, {PIPELINE_STAGE_2}, ... ], OPTIONS)**
+
+The Options is an optional field. For more information visit https://docs.mongodb.com/manual/reference/method/db.collection.aggregate/
 
 ### Mapreduce
 
@@ -492,4 +561,152 @@ Which will output:
 ```
 {  "_id"  :  "tom",  "value"  :  2  }  
 {  "_id"  :  "mark",  "value"  :  2  }
+```
+
+
+# MongoDB – Query Construction
+## Setup
+1. Just run `mongoimport --db cbd --collection rest --drop --file <path/>restaurants.json` to create the db **cbd** and add to it the collection **rest** containing all documents in the **restaurants.json** file.
+2. To check if you did it correctly, run the following command and check if the output is the same as presented 
+	```
+	$ ./mongo
+	> use cbd
+	> db.rest.count() 
+	3772
+	```
+## Exercises
+For this exercise we had to present a TXT file containing all the queries made. To make it easier on me, instead of writing the answers here and on the TXT, I just copied the TXT's contents into the following code block:
+
+```
+// NMEC: 89348
+
+#1
+// Liste todos os documentos da coleção.
+db.rest.find()
+
+#2
+// Apresente os campos restaurant_id, nome, localidade e gastronomia para todos os documentos da coleção.
+db.rest.find({}, {restaurant_id: 1, nome: 1, gastronomia: 1, localidade: 1})
+
+#3
+// Apresente os campos restaurant_id, nome, localidade e código postal (zipcode), mas exclua o campo _id de todos os documentos da coleção.
+db.rest.find({}, {_id: 0, restaurant_id: 1, nome: 1, localidade: 1, 'address.zipcode': 1})
+
+#4 
+//Indique o total de restaurantes localizados no Bronx.
+db.rest.aggregate([{$match: {localidade: {$eq: 'Bronx'}}},{$count: "No of Restaurants in Bronx"}])
+//309
+
+#5 
+//Apresente os primeiros 5 restaurantes localizados no Bronx.
+db.rest.find( { localidade: { $eq: 'Bronx' }} ).limit(5)
+
+#6 
+//Liste todos os restaurantes que tenham pelo menos um score superior a 85.
+db.rest.find({'grades.score' : {$gt: 85}})
+
+#7
+//Encontre os restaurantes que obtiveram uma ou mais pontuações (score) entre [80 e 100].
+db.rest.find({$and: [{'grades.score' : {$gte: 80}},{'grades.score': {$lte: 100}}]})
+//NOTA: Dizer ao stor, somewhy o AND nao esta a funcionar como devia, i.e, deu como output um restaurante que nao tem nenhum score no range
+
+#8
+//Indique os restaurantes com latitude inferior a -95,7.
+db.rest.find({"address.coord.0": {$lt: -97.5}})
+
+#9
+//Indique os restaurantes que não têm gastronomia "American", tiveram uma (ou mais) pontuação superior a 70 e estão numa latitude inferior a -65.
+db.rest.find({gastronomia: {$ne: "American"}, 'grades.score': {$gt: 70}, 'address.coord.0': {$lt: -65}})
+
+#10
+//Liste o restaurant_id, o nome, a localidade e gastronomia dos restaurantes cujo nome começam por "Wil".
+db.rest.find({nome: {$regex: 'Wil*'}}, {restaurant_id: 1,nome: 1, localidade: 1, gastronomia: 1})
+
+#11
+// Liste o nome, a localidade e a gastronomia dos restaurantes que pertencem ao Bronx e cuja gastronomia é do tipo "American" ou "Chinese".
+db.rest.find({ localidade: { $eq: 'Bronx' }, $or: [{gastronomia: { $eq: 'American' }},{gastronomia: { $eq: 'Chinese' }}]}, {nome: 1, localidade: 1, gastronomia: 1})
+
+#12
+//Liste o restaurant_id, o nome, a localidade e a gastronomia dos restaurantes localizados em "Staten Island", "Queens", "Bronx" ou "Brooklyn".
+db.rest.find({$or: [{localidade: { $eq: 'Bronx' }}, {localidade: { $eq: 'Queens' }}, {localidade: { $eq: 'Staten Island' }}, {localidade: { $eq: 'Brooklyn' }}]}, {nome: 1, restaurant_id: 1, gastronomia:1, localidade: 1})
+
+#13
+//Liste o nome, a localidade, o score e gastronomia dos restaurantes que alcançaram sempre pontuações inferiores ou igual a 3.
+db.rest.find({'grades.score': {$not: {$gt: 3}}},{nome: 1, 'grades.score': 1, gastronomia:1, localidade: 1})
+
+#14
+//Liste o nome e as avaliações dos restaurantes que obtiveram uma avaliação com um grade "A", um score 10 na data "2014-08-11T00: 00: 00Z" (ISODATE).
+db.rest.find({'grades': {'$elemMatch': {grade: 'A', score: 10, date: ISODate("2014-08-11T00:00:00Z")}}},{'grades.grade': 1, nome: 1})
+
+#15
+//Liste o restaurant_id, o nome e os score dos restaurantes nos quais a segunda avaliação foi grade "A" e ocorreu em ISODATE "2014-08-11T00: 00: 00Z".
+db.rest.find({'grades.1.grade': {$eq: 'A'}, 'grades.1.date': {$eq: ISODate("2014-08-11T00:00:00Z")}},{restaurant_id: 1, nome: 1, 'grades.score': 1})
+
+#16
+//Liste o restaurant_id, o nome, o endereço (address) e as coordenadas geográficas (coord) dos restaurantes onde o 2o elemento da matriz de coordenadas tem um valor superior a 42 e inferior ou igual a 52.
+db.rest.find({$and: [{'address.coord.1': {$gt:42}},{'address.coord.1': {$lte:52}}]},{restaurant_id: 1, address: 1, nome: 1})
+
+#17
+//Liste o nome de todos os restaurantes por ordem crescente.
+db.rest.find({},{nome: 1}).sort({nome: 1})
+
+#18
+//Liste nome, gastronomia e localidade de todos os restaurantes ordenando por ordem crescente da gastronomia e, em segundo, por ordem decrescente de localidade.
+db.rest.find({},{nome: 1,gastronomia: 1, localidade: 1}).sort({gastronomia: 1, localidade: -1})
+
+#19
+//Liste nome, localidade, grade e gastronomia de todos os restaurantes localizados em Brooklyn que não incluem gastronomia "American" e obtiveram uma classificação (grade) "A". Deve apresentá-los por ordem decrescente de gastronomia.
+db.rest.find({localidade: 'Brooklyn', gastronomia: {$ne: 'American'}},{nome: 1, localidade: 1, 'grades.grade': 1, gastronomia: 1}).sort({gastronomia: -1})
+
+#20
+//Conte o total de restaurante existentes em cada localidade.
+db.rest.aggregate([{$group : { _id : '$localidade', no_restaurants : {$sum : 1}}}])
+
+#21
+//Liste todos os restaurantes cuja média dos score é superior a 30.
+db.rest.aggregate([{$addFields : { average_score :  {$avg : '$grades.score'}}}, {$match : {average_score: {$gt: 30}}}])
+//Note the usage of pipeline stages, first to get the average score and then to use it as a comparasion
+
+#22
+//Indique os restaurantes que têm gastronomia "American", o somatório de score é superior a 70 e estão numa latitude inferior a -65.
+db.rest.aggregate([{$addFields : { total_score :  {$sum : '$grades.score'}}}, {$match : {total_score: {$gt: 70}, gastronomia: 'American', 'address.coord.0': {$lt: -65}}}])
+
+#23
+//Apresente uma lista com todos os tipos de gastronomia e o respetivo número de restaurantes, ordenada por ordem decrescente deste número.
+db.rest.aggregate([{$group : { _id : '$gastronomia', no_restaurants : {$sum : 1}}}, {$sort: {no_restaurants: -1}}])
+
+#24
+//Apresente o número de gastronomias diferentes na rua "Flatbush Avenue"
+db.rest.aggregate([{$match: {'address.rua': 'Flatbush Avenue'}},{$group: {'_id': '$gastronomia'}},{$count: "no_gastronomy"}])
+// 9
+
+#25
+// Conte quantos restaurantes existem por rua e ordene por ordem decrescente
+db.rest.aggregate([{$group : { _id : '$address.rua', no_restaurants : {$sum : 1}}}, {$sort: {no_restaurants: -1}}])
+
+#26
+// Quantos restaurantes italianos existem na Broadway?
+db.rest.aggregate([{$match: {gastronomia: 'Italian', 'address.rua': 'Broadway'}},{$count: 'no_restaurants'}])
+// 6
+
+#27
+// Liste o nome e score total de todos os restaurantes de comida Indiana com um score total menor que 15. 
+db.rest.aggregate([{$addFields: {total_score: {$sum: '$grades.score'}}}, {$match: {'gastronomia': 'Indian', 'total_score': {$lt: 15}}}, {$group: {_id: '$_id', nome: {'$first': '$nome'}, 'total_score': {'$first': '$total_score'}}}])
+
+
+#28
+// Quantos restaurantes possuem 'Restaurant' no nome?
+db.rest.aggregate([{$match: {nome: {$regex: 'Restaurant*'}}},{$count: 'no_restaurants'}])
+//561
+
+#29
+// Indique qual a gastronomia mais comum
+db.rest.aggregate([{$group : { _id : '$gastronomia', no_restaurants : {$sum : 1}}}, {$sort: {no_restaurants: -1}}, {$limit: 1}])
+//American
+
+
+#30
+// Indique o score médio total de todos os restaurantes
+db.rest.aggregate([{$addFields : { average_score :  {$avg : '$grades.score'}}}, {$group : {_id:null, average_score :  {$avg : '$average_score'}}}])
+//+-11.17
 ```
