@@ -38,6 +38,7 @@
  - [Query Construction](#query-construction)
 	 - [Setup](#setup)
 	 - [Exercises](#exercises)
+- [Server Side Functions](#server-side-functions)
 		
 
 # Initial Configurations
@@ -564,7 +565,7 @@ Which will output:
 ```
 
 
-# MongoDB – Query Construction
+# Query Construction
 ## Setup
 1. Just run `mongoimport --db cbd --collection rest --drop --file <path/>restaurants.json` to create the db **cbd** and add to it the collection **rest** containing all documents in the **restaurants.json** file.
 2. To check if you did it correctly, run the following command and check if the output is the same as presented 
@@ -704,9 +705,334 @@ db.rest.aggregate([{$match: {nome: {$regex: 'Restaurant*'}}},{$count: 'no_restau
 db.rest.aggregate([{$group : { _id : '$gastronomia', no_restaurants : {$sum : 1}}}, {$sort: {no_restaurants: -1}}, {$limit: 1}])
 //American
 
-
 #30
 // Indique o score médio total de todos os restaurantes
 db.rest.aggregate([{$addFields : { average_score :  {$avg : '$grades.score'}}}, {$group : {_id:null, average_score :  {$avg : '$average_score'}}}])
 //+-11.17
+```
+
+## Server Side Functions
+
+### a)
+Start a mongo shell and input the following commands:
+```
+> load("<path to folder containing file>/populatePhones.js")
+true
+
+> populatePhones
+function (country, start, stop) {
+
+  var prefixes = [21, 22, 231, 232, 233, 234 ];
+  for (var i = start; i <= stop; i++) {
+
+    var prefix = prefixes[(Math.random() * 6) << 0]
+    var countryNumber = (prefix * Math.pow(10, 9 - prefix.toString().length)) + i;
+    var num = (country * 1e9) + countryNumber;
+    var fullNumber = "+" + country + "-" + countryNumber;
+
+    db.phones.insert({
+      _id: num,
+      components: {
+        country: country,
+        prefix: prefix,
+        number: i
+      },
+      display: fullNumber
+    });
+    print("Inserted number " + fullNumber);
+  }
+  print("Done!");
+}
+
+> populatePhones(351, 1, 5)
+Inserted number +351-220000001
+Inserted number +351-220000002
+Inserted number +351-220000003
+Inserted number +351-220000004
+Inserted number +351-210000005
+Done!
+```
+
+Somethings to note are the fact that we're not actually adding any data to any database, our data is being stored "in shell" and not in the server and the fact that this can probably also be done using Robo3T rather than the shell, but I'm not really sure how to so...meh
+
+
+### b)
+Simply run the following commands (note that the first one is used to drop the data we inserted into the shell in exercise a) )
+
+```
+> db.phones.drop()
+true
+> populatePhones(351, 1, 200000)
+(...)
+Inserted number +351-220199995
+Inserted number +351-220199996
+Inserted number +351-232199997
+Inserted number +351-232199998
+Inserted number +351-234199999
+Inserted number +351-210200000
+Done!
+
+//And now to test if it worked
+> db.phones.find().count()
+200000
+
+> db.phones.find({"components.country": 351})
+{ "_id" : 351220000001, "components" : { "country" : 351, "prefix" : 22, "number" : 1 }, "display" : "+351-220000001" }
+{ "_id" : 351231000002, "components" : { "country" : 351, "prefix" : 231, "number" : 2 }, "display" : "+351-231000002" }
+{ "_id" : 351232000003, "components" : { "country" : 351, "prefix" : 232, "number" : 3 }, "display" : "+351-232000003" }
+{ "_id" : 351231000004, "components" : { "country" : 351, "prefix" : 231, "number" : 4 }, "display" : "+351-231000004" }
+{ "_id" : 351220000005, "components" : { "country" : 351, "prefix" : 22, "number" : 5 }, "display" : "+351-220000005" }
+{ "_id" : 351220000006, "components" : { "country" : 351, "prefix" : 22, "number" : 6 }, "display" : "+351-220000006" }
+{ "_id" : 351210000007, "components" : { "country" : 351, "prefix" : 21, "number" : 7 }, "display" : "+351-210000007" }
+{ "_id" : 351231000008, "components" : { "country" : 351, "prefix" : 231, "number" : 8 }, "display" : "+351-231000008" }
+{ "_id" : 351234000009, "components" : { "country" : 351, "prefix" : 234, "number" : 9 }, "display" : "+351-234000009" }
+{ "_id" : 351232000010, "components" : { "country" : 351, "prefix" : 232, "number" : 10 }, "display" : "+351-232000010" }
+{ "_id" : 351232000011, "components" : { "country" : 351, "prefix" : 232, "number" : 11 }, "display" : "+351-232000011" }
+{ "_id" : 351232000012, "components" : { "country" : 351, "prefix" : 232, "number" : 12 }, "display" : "+351-232000012" }
+{ "_id" : 351232000013, "components" : { "country" : 351, "prefix" : 232, "number" : 13 }, "display" : "+351-232000013" }
+{ "_id" : 351231000014, "components" : { "country" : 351, "prefix" : 231, "number" : 14 }, "display" : "+351-231000014" }
+{ "_id" : 351220000015, "components" : { "country" : 351, "prefix" : 22, "number" : 15 }, "display" : "+351-220000015" }
+{ "_id" : 351232000016, "components" : { "country" : 351, "prefix" : 232, "number" : 16 }, "display" : "+351-232000016" }
+{ "_id" : 351231000017, "components" : { "country" : 351, "prefix" : 231, "number" : 17 }, "display" : "+351-231000017" }
+{ "_id" : 351210000018, "components" : { "country" : 351, "prefix" : 21, "number" : 18 }, "display" : "+351-210000018" }
+{ "_id" : 351234000019, "components" : { "country" : 351, "prefix" : 234, "number" : 19 }, "display" : "+351-234000019" }
+{ "_id" : 351231000020, "components" : { "country" : 351, "prefix" : 231, "number" : 20 }, "display" : "+351-231000020" }
+Type "it" for more
+
+```
+
+### c)
+Create a new file with the following query JS:
+
+```
+phonesPerPrefix  =  function () {
+
+return  db.phones.aggregate([{$group: {_id:  "$components.prefix", no_phones: {$sum:  1}}}, {$sort: {no_phones:  -1}}])
+
+}
+```
+
+And now lets test it in our shell:
+```
+> load("phonesPerPrefix.js")
+true
+
+> phonesPerPrefix()
+{ "_id" : 21, "no_phones" : 33449 }
+{ "_id" : 231, "no_phones" : 33381 }
+{ "_id" : 234, "no_phones" : 33337 }
+{ "_id" : 232, "no_phones" : 33309 }
+{ "_id" : 22, "no_phones" : 33276 }
+{ "_id" : 233, "no_phones" : 33248 }
+```
+
+### d)
+Choosing to make a function that finds all numbers with non-repeating digits, we get the function:
+
+```
+findNonRepeatingDigits  =  function () {
+
+	var  fullNumber  =  db.phones.find({},{"display":  1, "_id":  0}).toArray();
+
+	var  non_repeating_numbers  = []
+
+	for (var  i  =  0 ; i<fullNumber.length ; i++){
+		var  number  =  fullNumber[i].display
+		number  =  number.split("-")[1]
+
+		var  arr  = []
+		var  non_repeating  =  true
+
+  
+
+		for(var  j  =  0 ; j<number.length ; j++){
+			if (arr.includes(number[j])){
+				non_repeating  =  false
+				break
+			}
+
+			arr.push(number[j])
+
+		}
+
+		if (non_repeating){
+			non_repeating_numbers.push(fullNumber[i])
+		}
+
+	}
+	return  non_repeating_numbers
+}
+```
+
+Which we can test in the terminal like so:
+```
+> load("findNonRepeatingDigits.js")
+true
+> findNonRepeatingDigits()
+[ (...)
+	{
+		"display" : "+351-234196750"
+	},
+	{
+		"display" : "+351-234197058"
+	},
+	{
+		"display" : "+351-234197506"
+	},
+	{
+		"display" : "+351-234197508"
+	},
+	{
+		"display" : "+351-234197568"
+	},
+	{
+		"display" : "+351-234197680"
+	},
+	{
+		"display" : "+351-234197850"
+	},
+	{
+		"display" : "+351-234197865"
+	},
+	{
+		"display" : "+351-234198076"
+	},
+	{
+		"display" : "+351-234198650"
+	},
+	{
+		"display" : "+351-234198756"
+	}
+]
+//Note this is the output we get if we have 200 000 numbers in our db
+```
+
+## MongoDB Driver
+### Setup
+-	Pick one of the following drivers (I used python):
+-https://docs.mongodb.com/ecosystem/drivers/
+
+-	Installing the Python Driver:
+`$ sudo pip3 install pymongo`
+
+### a)
+```
+from pymongo import  *
+
+from datetime import datetime 
+
+CLIENT = MongoClient()
+
+
+def  insert_document(collection, new_doc):
+	try:
+		inserted_id = collection.insert_one(new_doc).inserted_id
+		print("Success!\n >",inserted_id,"\n")
+
+	except  Exception  as e:
+		print("Error: ", e)
+		print("No new document was inserted!\n")
+
+def  update_documents(collection, update_query, update_values):
+	try:
+		update_count = collection.update_many(update_query, update_values).modified_count
+		print("Success!\n >",update_count, " documents updated\n")
+		
+	except  Exception  as e:
+		print("Error: ", e)
+		print("No document was updated!\n")
+
+def  search_by_query(collection, search_query):
+	try:
+		for document in collection.find(search_query):
+		print(" >",document,"\n")
+
+	except  Exception  as e:
+		print("Error: ", e)
+		print("Couldn't search for any document!\n")
+
+
+
+def  main(db_name, collection_name):
+	db = CLIENT[db_name]
+	collection = db[collection_name]
+
+	insert_document(collection, {"address": {"building": "69420", "coord": [-69.0, 420.696969], "rua": "Some Street", "zipcode": "42069"}, "localidade": "Sta Maria da Feira", "gastronomia": "Italian", "grades": [{"date": datetime(2019, 6, 12, 0, 0), "grade": "A", "score": 69}, {"date": datetime(2017, 7, 7, 0, 0), "grade": "B", "score": 100}], "nome": "Fierabella", "restaurant_id": "69696969"})
+
+	update_documents(collection,{"localidade": "Sta Maria da Feira"},{"$set": {"rua": "Ao pe do castelo"}})
+
+	search_by_query(collection,{"gastronomia": "Italian"})
+
+if  __name__  ==  '__main__':
+	main("cbd", "rest")
+```
+
+
+### b)
+Incremented from the code in the last exercise
+```
+def  create_new_index(collection,index,name):
+	try:
+		collection.create_index(index,name=name)
+
+		for indexes in collection.index_information():
+			print(" >",indexes,"\n")
+	except  Exception  as e:
+		print("Error: ", e)
+		print("Couldn't creat the index!\n")
+
+def main():
+	(...)
+	
+	create_new_index(collection,"localidade","localidade")
+	create_new_index(collection,"gastronomia","gastronomia")
+	create_new_index(collection,[("nome",TEXT)],"nome")
+```
+
+
+### c)
+Incremented from the code in the last exercise
+```
+def  count_rest_by_localidade(collection):
+	try:
+		result = collection.aggregate([{"$group": {"_id": "$localidade", "noRestaurants": {"$sum": 1}}}])
+		return ["-> "  +  str(document["_id"]) +  " - "  +  str(document["noRestaurants"]) for document in  list(result)]
+	except  Exception  as e:
+		print("Error: ", e)
+		print("Couldn't query collection!\n")
+
+  
+def  count_rest_by_localidade_by_gastronomy(collection):
+	try:
+		result = collection.aggregate([{"$group": {"_id": {"localidade": "$localidade","gastronomy": "$gastronomia"}, "noRestaurants": {"$sum": 1}}}])
+		return ["-> "  +  str(document["_id"]["localidade"]) +  " | "  +  str(document["_id"]["gastronomy"]) +  " - "  +  str(document["noRestaurants"]) for document in  list(result)]
+	except  Exception  as e:
+		print("Error: ", e)
+		print("Couldn't query collection!\n")
+ 
+
+def  get_rest_with_name_closer_to(collection,name):
+	try:
+		result = collection.aggregate([{"$match": {"nome": {"$regex": name}}}])
+		return ["-> "  +  str(document["nome"]) for document in  list(result)]
+	except  Exception  as e:
+		print("Error: ", e)
+		print("Couldn't query collection!\n")
+
+
+def main():
+	(...)
+	print("\nNumber of locations: ", count_localidades(collection))
+
+	print("\nNumber of restaurants per locale")
+	for i in count_rest_by_localidade(collection):
+		print(" ",i)
+
+	print("\nNumber of restaurants per locale and gastronomy")
+	for i in count_rest_by_localidade_by_gastronomy(collection):
+		print(" ",i)
+
+	print("\nName of restaurants whose names contain \'Park\'")
+	for i in get_rest_with_name_closer_to(collection,"Park"):
+		print(" ",i)
 ```
