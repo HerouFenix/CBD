@@ -39,6 +39,16 @@
 	 - [Setup](#setup)
 	 - [Exercises](#exercises)
 - [Server Side Functions](#server-side-functions)
+	- [a)](#a)
+	- [b)](#b)
+	- [c)](#c)
+	- [d)](#d)
+- [MongoDB Driver](#mongodb-driver)
+	- [Setup](#setup)
+	-  [a)](#a)
+	- [b)](#b)
+	- [c)](#c)
+- [Freeform DB](#freeform-db)
 		
 
 # Initial Configurations
@@ -1036,3 +1046,64 @@ def main():
 	for i in get_rest_with_name_closer_to(collection,"Park"):
 		print(" ",i)
 ```
+
+
+# Freeform DB
+
+## The Pokémon GO! Dataset
+For this exercise I chose to use the Pokemon GO! Pokedéx Dataset, downloadable at https://raw.githubusercontent.com/Biuni/PokemonGO-Pokedex/master/pokedex.json. This json however came as a single document containing an array of all other documents so some slight editing was needed so I'd **recommend downloading the version I've included in the exercise's directory**
+For more Datasets, I'd recommend Kaggle or https://github.com/jdorfman/awesome-json-datasets
+
+## Setup
+Download the dataset file (should be a json) and run the following command:
+`$ mongoimport --db cbd --collection pokedex --drop --file pokemon.json`
+
+## Find Queries
+```
+#Search for all Fire Type Pokémons ordered by Pokedex Entry (id)
+ > db.pokedex.find( { type: "Fire"} ).sort({"id":1})
+
+#Search for all Pokémons with 2 or more evolutions (next_evolution)
+ > db.pokedex.find( {'next_evolution.1': {$exists: true}} )
+
+#Find all candies (candy) of first evolution Pokémons (prev_evolution) sorted alphabetically
+ > db.pokedex.find({'prev_evolution': {$exists: false}},{"_id": 0, candy: 1}).sort({"candy": 1})
+
+#Find all Pokémon weak against Psychic types that have a spawn chance bigger than 0.2
+ > db.pokedex.find({'weaknesses': 'Psychic', 'spawn_chance': {$gt: 0.2}})
+
+#Find all Pokémon with a height between 5 and 20 meters sorted in reverse by name
+ > db.pokedex.find( {$and: [ {'height': {$gte: 5}}, {'height': {$lte: 20}}] }).sort({"name": -1})
+
+#Find all Pokémon that come from an egg and whose weight is bigger than 10kg. Show only the Pokémons Name and Pokédex ID (id)
+ > db.pokedex.find({'weight': {$gt: 10}, 'egg': {$ne: "Not in Eggs"} },{"_id": 0, "name": 1, "id": 1})
+```
+
+
+## Aggregate Queries
+```
+#Count how many Fighting type Pokémons exist who're also weak to Water
+ > db.pokedex.aggregate([{$match : { "type" : "Fighting", "weaknesses" : "Flying"}}, {$count: "fighting_weak_to_water"}])
+
+#List the average height, weight and spawn chance for all Pokémon
+db.pokedex.aggregate([{$group : { "_id" : 0, avg_height : {"$avg": "$height"}, avg_weight: {"$avg": "$weight"},avg_spawn: {"$avg": "$spawn_chance"}}}])
+
+#List how many Pokémon of each Types there are
+ > db.pokedex.aggregate([{$unwind: '$type'},{$group : { _id : '$type', count : {$sum : 1}}}])
+
+#What's the most common weakness?
+ > db.pokedex.aggregate([{$unwind: '$weaknesses'},{$group : { _id : '$weaknesses', count : {$sum : 1}}}, {$sort: {count: -1}}, {$limit: 1}])
+
+#Count how many pokemon have 'Pid' in the name
+ > db.pokedex.aggregate([{$match: {name: {$regex: 'Pid'}}},{$count: 'no_pokemon_with_pid'}])
+
+#How many evolutions does each Water type Pokémon have?
+db.pokedex.aggregate([{$match: {$and: [{prev_evolution: {$exists: false}},{next_evolution: {$exists: true}}, {type: 'Water'}]}}, {$project: {counter: {$size: "$next_evolution"}}}])
+
+#Count the ammount of Pokémon that come from eggs and have exactly 2 types
+ > db.pokedex.aggregate([{$match: {type: {$size: 2}}},{$count: 'no_pokeom_egg_multitype'}])
+
+#How many Pokémon with no evolutions don't come from eggs?
+ > db.pokedex.aggregate([{$match: {$and: [{egg: "Not in Eggs"}, {prev_evolution: {$exists: false}}, {next_evolution: {$exists: false}}]}},{$count: 'no_pokemon'}])
+
+``` 
