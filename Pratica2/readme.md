@@ -1054,6 +1054,51 @@ def main():
 For this exercise I chose to use the Pokemon GO! Pokedéx Dataset, downloadable at https://raw.githubusercontent.com/Biuni/PokemonGO-Pokedex/master/pokedex.json. This json however came as a single document containing an array of all other documents so some slight editing was needed so I'd **recommend downloading the version I've included in the exercise's directory**
 For more Datasets, I'd recommend Kaggle or https://github.com/jdorfman/awesome-json-datasets
 
+This is what each document of the Pokemon dataset looks like (comments annoted by '->'):
+```
+    {
+      "id": 2,
+      "num": "002",
+      "name": "Ivysaur",
+      "img": "http://www.serebii.net/pokemongo/pokemon/002.png",
+      "type": [
+        "Grass",
+        "Poison"
+      ],
+      "height": 0.99,
+      "weight":13.0 ,
+      "candy": "Bulbasaur Candy",
+      "candy_count": 100,
+      "egg": "Not in Eggs",
+      "spawn_chance": 0.042,
+      "avg_spawns": 4.2,
+      "spawn_time": "07:00",
+      "multipliers": [
+        1.2,
+        1.6
+      ],
+      "weaknesses": [
+        "Fire",
+        "Ice",
+        "Flying",
+        "Psychic"
+      ],
+      "prev_evolution": [	-> Might or might not Exist
+        {
+          "num": "001",
+          "name": "Bulbasaur"
+        }
+      ],
+      "next_evolution": [	->Might or might not Exist
+        {
+          "num": "003",
+          "name": "Venusaur"
+        }
+      ]
+    }
+
+```
+
 ## Setup
 Download the dataset file (should be a json) and run the following command:
 `$ mongoimport --db cbd --collection pokedex --drop --file pokemon.json`
