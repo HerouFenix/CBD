@@ -1,0 +1,13 @@
+{"user": "user7@bot.com ", "video_id": "19e006d0-0d6d-11ea-9d48-0b1cc2ad2f9d", "real_timestamp": "2019-11-22 21:21:08.717Z", "video_timestamp": 0, "action": "Play", "id": "001521d1-0d6e-11ea-9d48-0b1cc2ad2f9d"}
+{"user": "clau@sof.pt", "video_id": "1baab4b0-0d6d-11ea-9d48-0b1cc2ad2f9d", "real_timestamp": "2019-11-22 21:21:13.276Z", "video_timestamp": 69, "action": "Stop", "id": "02ccc7c1-0d6e-11ea-9d48-0b1cc2ad2f9d"}
+{"user": "clau@sof.pt", "video_id": "1baab4b0-0d6d-11ea-9d48-0b1cc2ad2f9d", "real_timestamp": "2019-11-22 21:21:11.057Z", "video_timestamp": 0, "action": "Play", "id": "017a3011-0d6e-11ea-9d48-0b1cc2ad2f9d"}
+{"user": "ds@test.com", "video_id": "3ffcc5a0-0d4b-11ea-9d48-0b1cc2ad2f9d", "real_timestamp": "2019-11-22 21:21:06.578Z", "video_timestamp": 310, "action": "Play", "id": "fecebf21-0d6d-11ea-9d48-0b1cc2ad2f9d"}
+{"user": "ds@test.com", "video_id": "3ffcc5a0-0d4b-11ea-9d48-0b1cc2ad2f9d", "real_timestamp": "2019-11-22 21:21:04.542Z", "video_timestamp": 310, "action": "Pause", "id": "fd9813e1-0d6d-11ea-9d48-0b1cc2ad2f9d"}
+{"user": "ds@test.com", "video_id": "3ffcc5a0-0d4b-11ea-9d48-0b1cc2ad2f9d", "real_timestamp": "2019-11-22 21:20:59.505Z", "video_timestamp": 0, "action": "Play", "id": "fa977e11-0d6d-11ea-9d48-0b1cc2ad2f9d"}
+{"user": "ds@test.com", "video_id": "1f1a11e0-0d6d-11ea-9d48-0b1cc2ad2f9d", "real_timestamp": "2019-11-22 21:21:27.469Z", "video_timestamp": 349, "action": "Stop", "id": "0b4275d1-0d6e-11ea-9d48-0b1cc2ad2f9d"}
+{"user": "ds@test.com", "video_id": "1f1a11e0-0d6d-11ea-9d48-0b1cc2ad2f9d", "real_timestamp": "2019-11-22 21:21:23.107Z", "video_timestamp": 200, "action": "Play", "id": "08a8df31-0d6e-11ea-9d48-0b1cc2ad2f9d"}
+{"user": "ds@test.com", "video_id": "1f1a11e0-0d6d-11ea-9d48-0b1cc2ad2f9d", "real_timestamp": "2019-11-22 21:21:20.931Z", "video_timestamp": 200, "action": "Pause", "id": "075cd731-0d6e-11ea-9d48-0b1cc2ad2f9d"}
+{"user": "ds@test.com", "video_id": "1f1a11e0-0d6d-11ea-9d48-0b1cc2ad2f9d", "real_timestamp": "2019-11-22 21:21:18.782Z", "video_timestamp": 150, "action": "Play", "id": "0614ede1-0d6e-11ea-9d48-0b1cc2ad2f9d"}
+{"user": "ds@test.com", "video_id": "1f1a11e0-0d6d-11ea-9d48-0b1cc2ad2f9d", "real_timestamp": "2019-11-22 21:21:16.028Z", "video_timestamp": 0, "action": "Play", "id": "0470b3c1-0d6e-11ea-9d48-0b1cc2ad2f9d"}
+{"user": "pedro@f.ag", "video_id": "20a1ea60-0d6d-11ea-9d48-0b1cc2ad2f9d", "real_timestamp": "2019-11-22 21:21:32.384Z", "video_timestamp": 50, "action": "Stop", "id": "0e306e01-0d6e-11ea-9d48-0b1cc2ad2f9d"}
+{"user": "pedro@f.ag", "video_id": "20a1ea60-0d6d-11ea-9d48-0b1cc2ad2f9d", "real_timestamp": "2019-11-22 21:21:29.930Z", "video_timestamp": 0, "action": "Start", "id": "0cb9faa1-0d6e-11ea-9d48-0b1cc2ad2f9d"}
