@@ -1,0 +1,72 @@
+#1
+// Liste a informação de cada utilizador.
+
+MATCH (user:Member)
+RETURN user
+
+
+#2
+// Liste o nome de cada utilizador.
+
+MATCH (user:Member)
+RETURN user.real_name
+
+
+#3
+// Liste a informação de cada projeto, no qual tenha participado pelo menos
+um utilizador.
+
+MATCH ()-[r:COMMITED]->(project:Project)
+WITH project, count(r) as rel_counter
+WHERE rel_counter >= 1
+RETURN project
+
+
+#4
+// Liste os utilizadores e total de projetos em que cada um colabora.
+
+MATCH (user:Member)-[r:COMMITED]->()
+WITH user, count(r) as rel_counter
+RETURN user,rel_counter
+
+
+#5
+// Liste os utilizadores e do total de projetos em que cada colabora ordenados
+por ordem decrescente do total.
+
+MATCH (user:Member)-[r:COMMITED]->()
+WITH user, count(r) as rel_counter
+RETURN user,rel_counter
+ORDER BY rel_counter DESC
+
+
+#6
+// Liste projetos e total de membros em cada projeto.
+
+MATCH ()-[r:COMMITED]->(project:Project)
+WITH project, count(r) as rel_counter
+RETURN project, rel_counter
+
+
+#7
+// Liste projetos e total de membros com a role "Committer" em cada projeto.
+
+MATCH ()-[r:COMMITED]->(project:Project)
+WITH project, count(r.role_on_project = "Committer") as rel_counter
+RETURN project, rel_counter
+
+#8
+// Liste todos os utilizadores que participaram nos mesmo projetos do que o
+utilizador "atm" (id). Mostre os atributos: nome de "atm", nome utilizador
+2, nome do projeto.
+
+MATCH (atm:Member {svn_id:"atm"})-[:COMMITED]->(project:Project)<-[:COMMITED]-(user:Member)
+RETURN atm.real_name, user.real_name, project.project_name
+
+
+#9
+// Liste todos os utilizadores que participaram com a role "Committer" em
+projetos em que o utilizador "atm" (id1) participou com a role "PMC".
+
+MATCH (atm:Member {svn_id:"atm"})-[:COMMITED {role_on_project: "PMC"}]->(project:Project)<-[:COMMITED {role_on_project: "Committer"}]-(user:Member)
+RETURN user
