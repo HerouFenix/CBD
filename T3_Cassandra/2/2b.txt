@@ -1,0 +1,912 @@
+### Keyspace Creation ###
+cqlsh> CREATE KEYSPACE cbd_video_sharing_melhor WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 3};
+cqlsh> USE cbd_video_sharing_melhor ;
+
+
+
+### Table Creation ###
+
+#USER
+cqlsh:cbd_video_sharing_melhor> CREATE COLUMNFAMILY Users (email text, username text, name text, reg_timestamp timestamp, Primary Key(email));
+
+
+#VIDEOS
+cqlsh:cbd_video_sharing_melhor> CREATE COLUMNFAMILY Videos(id int, author text, title text, upload_timestamp timestamp, description text, tags list<text>, Primary Key(id, upload_timestamp)) WITH CLUSTERING ORDER BY (upload_timestamp DESC);
+
+
+#VIDEOS PER TAG
+cqlsh:cbd_video_sharing_melhor> CREATE COLUMNFAMILY Videos_per_tag(tag text, video_ids list<int>, PRIMARY KEY(tag));
+
+
+#VIDEOS PER TAG 2
+cqlsh:cbd_video_sharing_melhor> CREATE COLUMNFAMILY Videos_tags(tag text, video_id int, Primary Key(tag,video_id));
+
+
+#VIDEOS PER AUTHOR
+cqlsh:cbd_video_sharing_melhor> CREATE COLUMNFAMILY Videos_per_author(user_email text, author text, video_id int, upload_timestamp timestamp, PRIMARY KEY(user_email, upload_timestamp, video_id));
+
+
+#COMMENTS PER USERNAME
+cqlsh:cbd_video_sharing_melhor> CREATE TABLE Comments_per_username(user_email text, user_username text, video_id int, comment text, upload_timestamp timestamp, PRIMARY KEY (user_username, upload_timestamp)) WITH CLUSTERING ORDER BY (upload_timestamp DESC);
+
+
+#COMMENTS PER VIDEO
+cqlsh:cbd_video_sharing_melhor> CREATE TABLE Comments_per_video(video_id int, user_email text, user_username text, comment text, upload_timestamp timestamp, PRIMARY KEY(video_id, upload_timestamp)) WITH CLUSTERING ORDER BY (upload_timestamp DESC);
+
+
+#FOLLOWERS PER VIDEO
+cqlsh:cbd_video_sharing_melhor> CREATE COLUMNFAMILY Followers_per_video(video_id int, user_email text, PRIMARY KEY(video_id, user_email));
+
+
+#VIDEOS FOLLOWED PER USER
+cqlsh:cbd_video_sharing_melhor> CREATE COLUMNFAMILY Followed_videos_per_author(video_ids list<int>, user_email text, PRIMARY KEY(user_email));
+
+
+#EVENTS PER AUTHOR PER VIDEO                     
+cqlsh:cbd_video_sharing_melhor> CREATE COLUMNFAMILY Events_per_author_in_video(user_email text, video_id int, action text, real_timestamp timestamp, video_timestamp int, PRIMARY KEY((user_email, video_id), real_timestamp, video_timestamp)) WITH CLUSTERING ORDER BY (real_timestamp DESC);
+
+
+#RATINGS PER VIDEO      
+cqlsh:cbd_video_sharing_melhor> CREATE COLUMNFAMILY Ratings_per_video(review_id int, video_id int, value int, PRIMARY KEY(video_id, value,review_id));
+
+
+
+### Populating the Column Families ###
+
+#USER
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Users;
+
+ email | name | reg_timestamp | username
+-------+------+---------------+----------
+
+(0 rows)
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Users (email, name, reg_timestamp, username) VALUES ('ds@test.com', 'DS', dateof(now()), 'FenixDS');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Users (email, name, reg_timestamp, username) VALUES ('user1@bot.com', 'Bot1', dateof(now()), 'Tester1');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Users (email, name, reg_timestamp, username) VALUES ('user2@bot.com', 'Bot2', dateof(now()), 'Tester2');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Users (email, name, reg_timestamp, username) VALUES ('user3@bot.com', 'Bot3', dateof(now()), 'Tester3');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Users (email, name, reg_timestamp, username) VALUES ('user4@bot.com', 'Bot4', dateof(now()), 'Tester4');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Users (email, name, reg_timestamp, username) VALUES ('user5@bot.com', 'Bot5', dateof(now()), 'Tester5');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Users (email, name, reg_timestamp, username) VALUES ('user6@bot.com', 'Bot6', dateof(now()), 'Tester6');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Users (email, name, reg_timestamp, username) VALUES ('user7@bot.com', 'Bot7', dateof(now()), 'Tester7');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Users (email, name, reg_timestamp, username) VALUES ('user8@bot.com', 'Bot8', dateof(now()), 'Tester8');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Users (email, name, reg_timestamp, username) VALUES ('user9@bot.com', 'Bot9', dateof(now()), 'Tester9');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Users (email, name, reg_timestamp, username) VALUES ('user10@bot.com', 'Bot10', dateof(now()), 'Tester10');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Users (email, name, reg_timestamp, username) VALUES ('user11@bot.com', 'Bot11', dateof(now()), 'Tester11');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Users (email, name, reg_timestamp, username) VALUES ('user12@bot.com', 'Bot12', dateof(now()), 'Tester12');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Users (email, name, reg_timestamp, username) VALUES ('user13@bot.com', 'Bot13', dateof(now()), 'Tester13');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Users (email, name, reg_timestamp, username) VALUES ('user14@bot.com', 'Bot14', dateof(now()), 'Tester14');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Users (email, name, reg_timestamp, username) VALUES ('user15@bot.com', 'Bot15', dateof(now()), 'Tester15');
+
+
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Users;
+
+ email          | name  | reg_timestamp                   | username
+----------------+-------+---------------------------------+----------
+  user8@bot.com |  Bot8 | 2020-02-03 12:12:10.345000+0000 |  Tester8
+  user1@bot.com |  Bot1 | 2020-02-03 12:08:58.243000+0000 |  Tester1
+  user5@bot.com |  Bot5 | 2020-02-03 12:11:57.921000+0000 |  Tester5
+ user10@bot.com | Bot10 | 2020-02-03 12:12:19.256000+0000 | Tester10
+ user11@bot.com | Bot11 | 2020-02-03 12:12:23.790000+0000 | Tester11
+ user13@bot.com | Bot13 | 2020-02-03 12:12:32.718000+0000 | Tester13
+ user14@bot.com | Bot14 | 2020-02-03 12:12:37.519000+0000 | Tester14
+  user2@bot.com |  Bot2 | 2020-02-03 12:11:43.071000+0000 |  Tester2
+ user15@bot.com | Bot15 | 2020-02-03 12:12:41.820000+0000 | Tester15
+    ds@test.com |    DS | 2020-02-03 12:08:03.165000+0000 |  FenixDS
+  user9@bot.com |  Bot9 | 2020-02-03 12:12:15.017000+0000 |  Tester9
+  user4@bot.com |  Bot4 | 2020-02-03 12:11:53.549000+0000 |  Tester4
+  user6@bot.com |  Bot6 | 2020-02-03 12:12:01.719000+0000 |  Tester6
+  user7@bot.com |  Bot7 | 2020-02-03 12:12:05.848000+0000 |  Tester7
+  user3@bot.com |  Bot3 | 2020-02-03 12:11:48.556000+0000 |  Tester3
+ user12@bot.com | Bot12 | 2020-02-03 12:12:27.860000+0000 | Tester12
+
+(16 rows)
+
+
+#VIDEOS
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Videos;
+
+ id | author | upload_timestamp | description | tags | title
+----+--------+------------------+-------------+------+-------
+
+(0 rows)
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos (id, author, upload_timestamp, description, tags, title) VALUES (1, 'ds@test.com', dateof(now()), 'A day at the zoo', ['Zoo','Cute','Animals'], 'Zoo Video');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos (id, author, upload_timestamp, description, tags, title) VALUES (2, 'user1@bot.com', dateof(now()), 'Made by a bot', ['Creepy','Automated'], 'Creepy Automated Video');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos (id, author, upload_timestamp, description, tags, title) VALUES (2, 'user2@bot.com', dateof(now()), 'Made by a bot', ['Cute','Automated'], 'Cute Automated Video');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos (id, author, upload_timestamp, description, tags, title) VALUES (3, 'user2@bot.com', dateof(now()), 'Made by a bot', ['Mindblowing','Automated'], 'Mindblowing Automated Video');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos (id, author, upload_timestamp, description, tags, title) VALUES (4, 'user4@bot.com', dateof(now()), 'Made by a bot', ['Fantasy','Automated'], 'Fantasy Automated Video');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos (id, author, upload_timestamp, description, tags, title) VALUES (5, 'user10@bot.com', dateof(now()), 'Made by a bot', ['Fitness','Automated'], 'Fitness Automated Video');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos (id, author, upload_timestamp, description, tags, title) VALUES (6, 'user12@bot.com', dateof(now()), 'Made by a bot', ['NSFW','Automated'], 'NSFW Automated Video');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos (id, author, upload_timestamp, description, tags, title) VALUES (7, 'user2@bot.com', dateof(now()), 'Made by a bot', ['Gaming','Automated'], 'Gaming Automated Video');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos (id, author, upload_timestamp, description, tags, title) VALUES (8, 'user2@bot.com', dateof(now()), 'Made by a bot', ['Gaming','Automated'], 'Gaming Automated Video 2');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos (id, author, upload_timestamp, description, tags, title) VALUES (9, 'user6@bot.com', dateof(now()), 'Made by a bot', ['Mindblowing','Automated'], 'Mindblowing Automated Video 2');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos (id, author, upload_timestamp, description, tags, title) VALUES (10, 'ds@test.com', dateof(now()), 'The final video', ['Final'], 'The end');
+
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Videos;
+
+ id | author         | upload_timestamp                | description      | tags                         | title
+----+----------------+---------------------------------+------------------+------------------------------+-------------------------------
+  5 |  user4@bot.com | 2020-02-03 12:26:16.102000+0000 |    Made by a bot |     ['Fantasy', 'Automated'] |       Fantasy Automated Video
+ 10 |  user6@bot.com | 2020-02-03 12:26:38.442000+0000 |    Made by a bot | ['Mindblowing', 'Automated'] | Mindblowing Automated Video 2
+ 11 |    ds@test.com | 2020-02-03 12:26:41.783000+0000 |  The final video |                    ['Final'] |                       The end
+  1 |    ds@test.com | 2020-02-03 12:25:56.715000+0000 | A day at the zoo |   ['Zoo', 'Cute', 'Animals'] |                     Zoo Video
+  8 |  user2@bot.com | 2020-02-03 12:26:29.094000+0000 |    Made by a bot |      ['Gaming', 'Automated'] |        Gaming Automated Video
+  2 |  user1@bot.com | 2020-02-03 12:26:00.660000+0000 |    Made by a bot |      ['Creepy', 'Automated'] |        Creepy Automated Video
+  4 |  user2@bot.com | 2020-02-03 12:26:11.233000+0000 |    Made by a bot | ['Mindblowing', 'Automated'] |   Mindblowing Automated Video
+  7 | user12@bot.com | 2020-02-03 12:26:25.114000+0000 |    Made by a bot |        ['NSFW', 'Automated'] |          NSFW Automated Video
+  6 | user10@bot.com | 2020-02-03 12:26:19.779000+0000 |    Made by a bot |     ['Fitness', 'Automated'] |       Fitness Automated Video
+  9 |  user2@bot.com | 2020-02-03 12:26:33.813000+0000 |    Made by a bot |      ['Gaming', 'Automated'] |      Gaming Automated Video 2
+  3 |  user2@bot.com | 2020-02-03 12:26:05.135000+0000 |    Made by a bot |        ['Cute', 'Automated'] |          Cute Automated Video
+
+(11 rows)
+
+#Videos tags
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Videos_tags;
+
+ tag | video_id
+-----+----------
+
+(0 rows)
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('NSFW', 7);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Cute', 1);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Cute', 3);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Mindblowing', 10);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Mindblowing', 4);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Gaming', 8);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Gaming', 9);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Fitness', 6);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Animals', 1);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Zoo', 1);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Final', 11);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Creepy', 2);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Fantasy', 5);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Automated', 5);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Automated', 10);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Automated', 8);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Automated', 2);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Automated', 4);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Automated', 7);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Automated', 6);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Automated', 9);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_tags(tag,video_id) VALUES ('Automated', 3);
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Videos_tags;
+
+ tag         | video_id
+-------------+----------
+        NSFW |        7
+        Cute |        1
+        Cute |        3
+ Mindblowing |        4
+ Mindblowing |       10
+      Gaming |        8
+      Gaming |        9
+     Fitness |        6
+     Animals |        1
+         Zoo |        1
+       Final |       11
+   Automated |        2
+   Automated |        3
+   Automated |        4
+   Automated |        5
+   Automated |        6
+   Automated |        7
+   Automated |        8
+   Automated |        9
+   Automated |       10
+      Creepy |        2
+     Fantasy |        5
+
+(22 rows)
+
+
+#VIDEOS PER TAG
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Videos_per_tag;
+
+ tag | video_ids
+-----+-----------
+
+(0 rows)
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_tag(tag,video_ids) VALUES ('Automated', [5,10,8,2,4,7,6,9,3]);
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_tag(tag,video_ids) VALUES ('Fantasy', [5]);
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_tag(tag,video_ids) VALUES ('Mindblowing', [10,4]);
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_tag(tag,video_ids) VALUES ('Final', [11]);
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_tag(tag,video_ids) VALUES ('Zoo', [1]);
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_tag(tag,video_ids) VALUES ('Animals', [1]);
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_tag(tag,video_ids) VALUES ('Cute', [1,3]);
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_tag(tag,video_ids) VALUES ('Gaming', [8,9]);
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_tag(tag,video_ids) VALUES ('Creepy', [2]);
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_tag(tag,video_ids) VALUES ('NSFW', [7]);
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_tag(tag,video_ids) VALUES ('Fitness', [6]);
+
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Videos_per_tag;
+
+ tag         | video_ids
+-------------+------------------------------
+        NSFW |                          [7]
+        Cute |                       [1, 3]
+ Mindblowing |                      [10, 4]
+      Gaming |                       [8, 9]
+     Fitness |                          [6]
+     Animals |                          [1]
+         Zoo |                          [1]
+       Final |                         [11]
+   Automated | [5, 10, 8, 2, 4, 7, 6, 9, 3]
+      Creepy |                          [2]
+     Fantasy |                          [5]
+
+(11 rows)
+
+
+#VIDEOS PER AUTHOR
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Videos_per_author;
+
+ user_email | upload_timestamp | video_id | author
+------------+------------------+----------+--------
+
+(0 rows)
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_author(user_email, upload_timestamp, video_id, author) VALUES ('user2@bot.com','2020-02-03 12:26:05', 3, 'Bot2');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_author(user_email, upload_timestamp, video_id, author) VALUES ('user2@bot.com','2020-02-03 12:26:33', 9, 'Bot2');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_author(user_email, upload_timestamp, video_id, author) VALUES ('user10@bot.com','2020-02-03 12:26:19', 6, 'Bot10');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_author(user_email, upload_timestamp, video_id, author) VALUES ('user12@bot.com','2020-02-03 12:26:25', 7, 'Bot12');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_author(user_email, upload_timestamp, video_id, author) VALUES ('user2@bot.com','2020-02-03 12:26:11', 4, 'Bot2');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_author(user_email, upload_timestamp, video_id, author) VALUES ('user2@bot.com','2020-02-03 12:26:29', 8, 'Bot2');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_author(user_email, upload_timestamp, video_id, author) VALUES ('user1@bot.com','2020-02-03 12:26:00', 2, 'Bot1');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_author(user_email, upload_timestamp, video_id, author) VALUES ('ds@test.com','2020-02-03 12:26:41', 11, 'FenixDS');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_author(user_email, upload_timestamp, video_id, author) VALUES ('user6@bot.com','2020-02-03 12:26:38', 10, 'Bot6');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_author(user_email, upload_timestamp, video_id, author) VALUES ('user4@bot.com','2020-02-03 12:26:16', 5, 'Bot4');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Videos_per_author(user_email, upload_timestamp, video_id, author) VALUES ('ds@test.com','2020-02-03 12:25:56', 1, 'FenixDS');
+
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Videos_per_author;
+
+ user_email     | upload_timestamp                | video_id | author
+----------------+---------------------------------+----------+---------
+  user1@bot.com | 2020-02-03 12:26:00.000000+0000 |        2 |    Bot1
+ user10@bot.com | 2020-02-03 12:26:19.000000+0000 |        6 |   Bot10
+  user2@bot.com | 2020-02-03 12:26:05.000000+0000 |        3 |    Bot2
+  user2@bot.com | 2020-02-03 12:26:11.000000+0000 |        4 |    Bot2
+  user2@bot.com | 2020-02-03 12:26:29.000000+0000 |        8 |    Bot2
+  user2@bot.com | 2020-02-03 12:26:33.000000+0000 |        9 |    Bot2
+    ds@test.com | 2020-02-03 12:25:56.000000+0000 |        1 | FenixDS
+    ds@test.com | 2020-02-03 12:26:41.000000+0000 |       11 | FenixDS
+  user4@bot.com | 2020-02-03 12:26:16.000000+0000 |        5 |    Bot4
+  user6@bot.com | 2020-02-03 12:26:38.000000+0000 |       10 |    Bot6
+ user12@bot.com | 2020-02-03 12:26:25.000000+0000 |        7 |   Bot12
+
+(11 rows)
+
+
+#COMMENTS PER USERNAME and COMMENTS PER VIDEO
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Comments_per_username;
+
+ user_username | upload_timestamp | comment | user_email | video_id
+---------------+------------------+---------+------------+----------
+
+(0 rows)
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Comments_per_video;
+
+ video_id | upload_timestamp | comment | user_email | user_username
+----------+------------------+---------+------------+---------------
+
+(0 rows)
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Comments_per_username(user_username, upload_timestamp, comment, user_email,video_id) VALUES ('Bot1', dateof(now()), 'Automated Comment', 'user1@bot.com', 1); INSERT INTO Comments_per_video(video_id, upload_timestamp, comment, user_email, user_username) VALUES (1, dateof(now()), 'Automated Comment', 'user1@bot.com', 'Bot1');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Comments_per_username(user_username, upload_timestamp, comment, user_email,video_id) VALUES ('Bot2', dateof(now()), 'Automated Comment', 'user2@bot.com', 1); INSERT INTO Comments_per_video(video_id, upload_timestamp, comment, user_email, user_username) VALUES (1, dateof(now()), 'Automated Comment', 'user2@bot.com', 'Bot2');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Comments_per_username(user_username, upload_timestamp, comment, user_email,video_id) VALUES ('Bot3', dateof(now()), 'Automated Comment', 'user3@bot.com', 1); INSERT INTO Comments_per_video(video_id, upload_timestamp, comment, user_email, user_username) VALUES (1, dateof(now()), 'Automated Comment', 'user3@bot.com', 'Bot3');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Comments_per_username(user_username, upload_timestamp, comment, user_email,video_id) VALUES ('Bot3', dateof(now()), 'Good Video Fellow Bot', 'user3@bot.com', 2); INSERT INTO Comments_per_video(video_id, upload_timestamp, comment, user_email, user_username) VALUES (2, dateof(now()), 'Good Video Fellow Bot', 'user3@bot.com', 'Bot3');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Comments_per_username(user_username, upload_timestamp, comment, user_email,video_id) VALUES ('Bot4', dateof(now()), 'Good Video Fellow Bot', 'user4@bot.com', 2); INSERT INTO Comments_per_video(video_id, upload_timestamp, comment, user_email, user_username) VALUES (2, dateof(now()), 'Good Video Fellow Bot', 'user4@bot.com', 'Bot4');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Comments_per_username(user_username, upload_timestamp, comment, user_email,video_id) VALUES ('Bot5', dateof(now()), 'Good Video Fellow Bot', 'user5@bot.com', 6); INSERT INTO Comments_per_video(video_id, upload_timestamp, comment, user_email, user_username) VALUES (6, dateof(now()), 'Good Video Fellow Bot', 'user5@bot.com', 'Bot5');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Comments_per_username(user_username, upload_timestamp, comment, user_email,video_id) VALUES ('Bot8', dateof(now()), 'Good Video Fellow Bot', 'user8@bot.com', 9); INSERT INTO Comments_per_video(video_id, upload_timestamp, comment, user_email, user_username) VALUES (9, dateof(now()), 'Good Video Fellow Bot', 'user8@bot.com', 'Bot8');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Comments_per_username(user_username, upload_timestamp, comment, user_email,video_id) VALUES ('Bot10', dateof(now()), 'Good Video Fellow Bot', 'user10@bot.com', 10); INSERT INTO Comments_per_video(video_id, upload_timestamp, comment, user_email, user_username) VALUES (10, dateof(now()), 'Good Video Fellow Bot', 'user10@bot.com', 'Bot10');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Comments_per_username(user_username, upload_timestamp, comment, user_email,video_id) VALUES ('Bot1', dateof(now()), 'Goodbye', 'user1@bot.com', 11); INSERT INTO Comments_per_video(video_id, upload_timestamp, comment, user_email, user_username) VALUES (11, dateof(now()), 'Goodbye', 'user1@bot.com', 'Bot1');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Comments_per_username(user_username, upload_timestamp, comment, user_email,video_id) VALUES ('Bot2', dateof(now()), 'Goodbye', 'user2@bot.com', 11); INSERT INTO Comments_per_video(video_id, upload_timestamp, comment, user_email, user_username) VALUES (11, dateof(now()), 'Goodbye', 'user2@bot.com', 'Bot2');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Comments_per_username(user_username, upload_timestamp, comment, user_email,video_id) VALUES ('Bot3', dateof(now()), 'Goodbye', 'user3@bot.com', 11); INSERT INTO Comments_per_video(video_id, upload_timestamp, comment, user_email, user_username) VALUES (11, dateof(now()), 'Goodbye', 'user3@bot.com', 'Bot3');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Comments_per_username(user_username, upload_timestamp, comment, user_email,video_id) VALUES ('Bot4', dateof(now()), 'Goodbye', 'user4@bot.com', 11); INSERT INTO Comments_per_video(video_id, upload_timestamp, comment, user_email, user_username) VALUES (11, dateof(now()), 'Goodbye', 'user4@bot.com', 'Bot4');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Comments_per_username(user_username, upload_timestamp, comment, user_email,video_id) VALUES ('Bot5', dateof(now()), 'Goodbye', 'user5@bot.com', 11); INSERT INTO Comments_per_video(video_id, upload_timestamp, comment, user_email, user_username) VALUES (11, dateof(now()), 'Goodbye', 'user5@bot.com', 'Bot5');
+
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Comments_per_username;
+
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Comments_per_username;
+
+ user_username | upload_timestamp                | comment               | user_email     | video_id
+---------------+---------------------------------+-----------------------+----------------+----------
+          Bot2 | 2020-02-03 13:09:44.114000+0000 |               Goodbye |  user2@bot.com |       11
+          Bot2 | 2020-02-03 13:09:06.326000+0000 |     Automated Comment |  user2@bot.com |        1
+          Bot1 | 2020-02-03 13:09:40.107000+0000 |               Goodbye |  user1@bot.com |       11
+          Bot1 | 2020-02-03 13:09:01.982000+0000 |     Automated Comment |  user1@bot.com |        1
+         Bot10 | 2020-02-03 13:09:35.880000+0000 | Good Video Fellow Bot | user10@bot.com |       10
+          Bot5 | 2020-02-03 13:10:00.575000+0000 |               Goodbye |  user5@bot.com |       11
+          Bot5 | 2020-02-03 13:09:26.335000+0000 | Good Video Fellow Bot |  user5@bot.com |        6
+          Bot8 | 2020-02-03 13:09:31.060000+0000 | Good Video Fellow Bot |  user8@bot.com |        9
+          Bot3 | 2020-02-03 13:09:50.331000+0000 |               Goodbye |  user3@bot.com |       11
+          Bot3 | 2020-02-03 13:09:16.036000+0000 | Good Video Fellow Bot |  user3@bot.com |        2
+          Bot3 | 2020-02-03 13:09:11.490000+0000 |     Automated Comment |  user3@bot.com |        1
+          Bot4 | 2020-02-03 13:09:55.278000+0000 |               Goodbye |  user4@bot.com |       11
+          Bot4 | 2020-02-03 13:09:21.564000+0000 | Good Video Fellow Bot |  user4@bot.com |        2
+
+(13 rows)
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Comments_per_Video;
+
+ video_id | upload_timestamp                | comment               | user_email     | user_username
+----------+---------------------------------+-----------------------+----------------+---------------
+       10 | 2020-02-03 13:09:35.885000+0000 | Good Video Fellow Bot | user10@bot.com |         Bot10
+       11 | 2020-02-03 13:10:00.579000+0000 |               Goodbye |  user5@bot.com |          Bot5
+       11 | 2020-02-03 13:09:55.281000+0000 |               Goodbye |  user4@bot.com |          Bot4
+       11 | 2020-02-03 13:09:50.335000+0000 |               Goodbye |  user3@bot.com |          Bot3
+       11 | 2020-02-03 13:09:44.117000+0000 |               Goodbye |  user2@bot.com |          Bot2
+       11 | 2020-02-03 13:09:40.110000+0000 |               Goodbye |  user1@bot.com |          Bot1
+        1 | 2020-02-03 13:09:11.493000+0000 |     Automated Comment |  user3@bot.com |          Bot3
+        1 | 2020-02-03 13:09:06.329000+0000 |     Automated Comment |  user2@bot.com |          Bot2
+        1 | 2020-02-03 13:09:01.983000+0000 |     Automated Comment |  user1@bot.com |          Bot1
+        2 | 2020-02-03 13:09:21.567000+0000 | Good Video Fellow Bot |  user4@bot.com |          Bot4
+        2 | 2020-02-03 13:09:16.040000+0000 | Good Video Fellow Bot |  user3@bot.com |          Bot3
+        6 | 2020-02-03 13:09:26.338000+0000 | Good Video Fellow Bot |  user5@bot.com |          Bot5
+        9 | 2020-02-03 13:09:31.064000+0000 | Good Video Fellow Bot |  user8@bot.com |          Bot8
+
+(13 rows)
+
+
+#FOLLOWERS PER VIDEO
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Followers_per_Video;
+
+ video_id | user_email
+----------+------------
+
+(0 rows)
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(1,'user1@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(1,'user2@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(1,'user3@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(1,'user4@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(1,'user5@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(1,'user6@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(1,'user7@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(1,'user8@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(1,'user9@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(1,'user10@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(11,'user10@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(11,'user1@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(11,'user2@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(11,'user3@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(11,'user4@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(11,'user5@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(11,'user6@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(11,'user7@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(11,'user8@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(11,'user9@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(2,'user1@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(4,'user4@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(6,'user2@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Followers_per_Video;
+
+ video_id | user_email
+----------+----------------
+       11 | user10@bot.com
+       11 |  user1@bot.com
+       11 |  user2@bot.com
+       11 |  user3@bot.com
+       11 |  user4@bot.com
+       11 |  user5@bot.com
+       11 |  user6@bot.com
+       11 |  user7@bot.com
+       11 |  user8@bot.com
+       11 |  user9@bot.com
+        1 | user10@bot.com
+        1 |  user1@bot.com
+        1 |  user2@bot.com
+        1 |  user3@bot.com
+        1 |  user4@bot.com
+        1 |  user5@bot.com
+        1 |  user6@bot.com
+        1 |  user7@bot.com
+        1 |  user8@bot.com
+        1 |  user9@bot.com
+        2 |  user1@bot.com
+        4 |  user4@bot.com
+        6 |  user2@bot.com
+
+(23 rows)
+
+#Follower and Video
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Followed_videos_per_author;
+
+ user_email | video_ids
+------------+-----------
+
+(0 rows)
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followers_per_Video(video_id, user_emaIl) VALUES(1,'user1@bot.com');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followed_videos_per_author (user_email,video_ids) VALUES ('user10@bot.com', [11, 1]);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followed_videos_per_author (user_email,video_ids) VALUES ('user1@bot.com', [11, 1,2]);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followed_videos_per_author (user_email,video_ids) VALUES ('user2@bot.com', [11, 1,6]);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followed_videos_per_author (user_email,video_ids) VALUES ('user3@bot.com', [11, 1]);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followed_videos_per_author (user_email,video_ids) VALUES ('user4@bot.com', [11, 1,4]);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followed_videos_per_author (user_email,video_ids) VALUES ('user5@bot.com', [11, 1]);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followed_videos_per_author (user_email,video_ids) VALUES ('user6@bot.com', [11, 1]);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followed_videos_per_author (user_email,video_ids) VALUES ('user7@bot.com', [11, 1]);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followed_videos_per_author (user_email,video_ids) VALUES ('user8@bot.com', [11, 1]);
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Followed_videos_per_author (user_email,video_ids) VALUES ('user9@bot.com', [11, 1]);
+
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM FOllowed_videos_per_author;
+
+ user_email     | video_ids
+----------------+------------
+  user8@bot.com |    [11, 1]
+  user1@bot.com | [11, 1, 2]
+  user5@bot.com |    [11, 1]
+ user10@bot.com |    [11, 1]
+  user2@bot.com | [11, 1, 6]
+  user9@bot.com |    [11, 1]
+  user4@bot.com | [11, 1, 4]
+  user6@bot.com |    [11, 1]
+  user7@bot.com |    [11, 1]
+  user3@bot.com |    [11, 1]
+
+(10 rows)
+
+
+#EVENTS PER AUTHOR PER VIDEO                     
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Events_per_author_in_video;
+
+ user_email | video_id | real_timestamp | video_timestamp | action
+------------+----------+----------------+-----------------+--------
+
+(0 rows)
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Events_per_author_in_video(user_email, video_id, real_timestamp, video_timestamp, action) VALUES ('user2@bot.com', 1, dateof(now()), 0, 'Play');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Events_per_author_in_video(user_email, video_id, real_timestamp, video_timestamp, action) VALUES ('user2@bot.com', 1, dateof(now()), 98, 'Pause');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Events_per_author_in_video(user_email, video_id, real_timestamp, video_timestamp, action) VALUES ('user2@bot.com', 1, dateof(now()), 98, 'Play');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Events_per_author_in_video(user_email, video_id, real_timestamp, video_timestamp, action) VALUES ('user2@bot.com', 1, dateof(now()), 120, 'Stop');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Events_per_author_in_video(user_email, video_id, real_timestamp, video_timestamp, action) VALUES ('user4@bot.com', 11, dateof(now()), 0, 'Play');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Events_per_author_in_video(user_email, video_id, real_timestamp, video_timestamp, action) VALUES ('user4@bot.com', 11, dateof(now()), 20, 'Stop');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Events_per_author_in_video(user_email, video_id, real_timestamp, video_timestamp, action) VALUES ('user6@bot.com', 11, dateof(now()), 0, 'Play');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Events_per_author_in_video(user_email, video_id, real_timestamp, video_timestamp, action) VALUES ('user6@bot.com', 11, dateof(now()), 0, 'Stop');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Events_per_author_in_video(user_email, video_id, real_timestamp, video_timestamp, action) VALUES ('user9@bot.com', 11, dateof(now()), 0, 'Play');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Events_per_author_in_video(user_email, video_id, real_timestamp, video_timestamp, action) VALUES ('user9@bot.com', 11, dateof(now()), 20, 'Stop');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Events_per_author_in_video(user_email, video_id, real_timestamp, video_timestamp, action) VALUES ('user4@bot.com', 5, dateof(now()), 51, 'Play');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Events_per_author_in_video(user_email, video_id, real_timestamp, video_timestamp, action) VALUES ('user4@bot.com', 5, dateof(now()), 150, 'Pause');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Events_per_author_in_video(user_email, video_id, real_timestamp, video_timestamp, action) VALUES ('user4@bot.com', 5, dateof(now()), 150, 'Stop');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Events_per_author_in_video(user_email, video_id, real_timestamp, video_timestamp, action) VALUES ('user10@bot.com', 10, dateof(now()), 0, 'Play');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Events_per_author_in_video(user_email, video_id, real_timestamp, video_timestamp, action) VALUES ('user10@bot.com', 10, dateof(now()), 124, 'Pause');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Events_per_author_in_video(user_email, video_id, real_timestamp, video_timestamp, action) VALUES ('user10@bot.com', 10, dateof(now()), 124, 'Play');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Events_per_author_in_video(user_email, video_id, real_timestamp, video_timestamp, action) VALUES ('user10@bot.com', 10, dateof(now()), 242, 'Pause');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Events_per_author_in_video(user_email, video_id, real_timestamp, video_timestamp, action) VALUES ('user10@bot.com', 10, dateof(now()), 242, 'Play');
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Events_per_author_in_video(user_email, video_id, real_timestamp, video_timestamp, action) VALUES ('user10@bot.com', 10, dateof(now()), 300, 'Stop');
+
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Events_per_author_in_video;
+
+ user_email     | video_id | real_timestamp                  | video_timestamp | action
+----------------+----------+---------------------------------+-----------------+--------
+ user10@bot.com |       10 | 2020-02-03 13:20:56.254000+0000 |             300 |   Stop
+ user10@bot.com |       10 | 2020-02-03 13:20:48.760000+0000 |             242 |   Play
+ user10@bot.com |       10 | 2020-02-03 13:20:43.892000+0000 |             242 |  Pause
+ user10@bot.com |       10 | 2020-02-03 13:20:36.894000+0000 |             124 |   Play
+ user10@bot.com |       10 | 2020-02-03 13:20:32.319000+0000 |             124 |  Pause
+ user10@bot.com |       10 | 2020-02-03 13:20:27.386000+0000 |               0 |   Play
+  user4@bot.com |       11 | 2020-02-03 13:19:20.357000+0000 |              20 |   Stop
+  user4@bot.com |       11 | 2020-02-03 13:19:14.334000+0000 |               0 |   Play
+  user2@bot.com |        1 | 2020-02-03 13:19:04.082000+0000 |             120 |   Stop
+  user2@bot.com |        1 | 2020-02-03 13:18:58.061000+0000 |              98 |   Play
+  user2@bot.com |        1 | 2020-02-03 13:18:54.945000+0000 |              98 |  Pause
+  user2@bot.com |        1 | 2020-02-03 13:18:44.942000+0000 |               0 |   Play
+  user6@bot.com |       11 | 2020-02-03 13:19:31.173000+0000 |               0 |   Stop
+  user6@bot.com |       11 | 2020-02-03 13:19:27.323000+0000 |               0 |   Play
+  user9@bot.com |       11 | 2020-02-03 13:19:47.608000+0000 |              20 |   Stop
+  user9@bot.com |       11 | 2020-02-03 13:19:38.267000+0000 |               0 |   Play
+  user4@bot.com |        5 | 2020-02-03 13:20:14.789000+0000 |             150 |   Stop
+  user4@bot.com |        5 | 2020-02-03 13:20:09.563000+0000 |             150 |  Pause
+  user4@bot.com |        5 | 2020-02-03 13:20:00.224000+0000 |              51 |   Play
+
+(19 rows)
+
+#RATINGS PER VIDEO      
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Ratings_per_Video;
+
+ video_id | value | review_id
+----------+-------+-----------
+
+(0 rows)
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Ratings_per_Video(video_id, value, review_id) VALUES (1,5,1) ;
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Ratings_per_Video(video_id, value, review_id) VALUES (1,5,2) ;
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Ratings_per_Video(video_id, value, review_id) VALUES (1,5,3) ;
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Ratings_per_Video(video_id, value, review_id) VALUES (1,4,4) ;
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Ratings_per_Video(video_id, value, review_id) VALUES (1,5,5) ;
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Ratings_per_Video(video_id, value, review_id) VALUES (2,2,6) ;
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Ratings_per_Video(video_id, value, review_id) VALUES (2,3,7) ;
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Ratings_per_Video(video_id, value, review_id) VALUES (11,2,8) ;
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Ratings_per_Video(video_id, value, review_id) VALUES (11,1,9) ;
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Ratings_per_Video(video_id, value, review_id) VALUES (11,5,10) ;
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Ratings_per_Video(video_id, value, review_id) VALUES (11,4,11) ;
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Ratings_per_Video(video_id, value, review_id) VALUES (11,2,12) ;
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Ratings_per_Video(video_id, value, review_id) VALUES (11,6,13) ;
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Ratings_per_Video(video_id, value, review_id) VALUES (11,1,14) ;
+
+cqlsh:cbd_video_sharing_melhor> INSERT INTO Ratings_per_Video(video_id, value, review_id) VALUES (11,2,15) ;
+
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Ratings_per_Video;
+
+ video_id | value | review_id
+----------+-------+-----------
+       11 |     1 |         9
+       11 |     1 |        14
+       11 |     2 |         8
+       11 |     2 |        12
+       11 |     2 |        15
+       11 |     4 |        11
+       11 |     5 |        10
+       11 |     6 |        13
+        1 |     4 |         4
+        1 |     5 |         1
+        1 |     5 |         2
+        1 |     5 |         3
+        1 |     5 |         5
+        2 |     2 |         6
+        2 |     3 |         7
+
+(15 rows)
+
+
+### JSON ###
+cqlsh:cbd_video_sharing_melhor> DESCRIBE TABLES;
+
+users           comments_per_username       followers_per_video
+videos          comments_per_video          ratings_per_video  
+videos_per_tag  events_per_author_in_video  videos_per_author  
+
+cqlsh:cbd_video_sharing_melhor> SELECT JSON * FROM Users;
+
+ [json]
+-------------------------------------------------------------------------------------------------------------------
+    {"email": "user8@bot.com", "name": "Bot8", "reg_timestamp": "2020-02-03 12:12:10.345Z", "username": "Tester8"}
+    {"email": "user1@bot.com", "name": "Bot1", "reg_timestamp": "2020-02-03 12:08:58.243Z", "username": "Tester1"}
+    {"email": "user5@bot.com", "name": "Bot5", "reg_timestamp": "2020-02-03 12:11:57.921Z", "username": "Tester5"}
+ {"email": "user10@bot.com", "name": "Bot10", "reg_timestamp": "2020-02-03 12:12:19.256Z", "username": "Tester10"}
+ {"email": "user11@bot.com", "name": "Bot11", "reg_timestamp": "2020-02-03 12:12:23.790Z", "username": "Tester11"}
+ {"email": "user13@bot.com", "name": "Bot13", "reg_timestamp": "2020-02-03 12:12:32.718Z", "username": "Tester13"}
+ {"email": "user14@bot.com", "name": "Bot14", "reg_timestamp": "2020-02-03 12:12:37.519Z", "username": "Tester14"}
+    {"email": "user2@bot.com", "name": "Bot2", "reg_timestamp": "2020-02-03 12:11:43.071Z", "username": "Tester2"}
+ {"email": "user15@bot.com", "name": "Bot15", "reg_timestamp": "2020-02-03 12:12:41.820Z", "username": "Tester15"}
+        {"email": "ds@test.com", "name": "DS", "reg_timestamp": "2020-02-03 12:08:03.165Z", "username": "FenixDS"}
+    {"email": "user9@bot.com", "name": "Bot9", "reg_timestamp": "2020-02-03 12:12:15.017Z", "username": "Tester9"}
+    {"email": "user4@bot.com", "name": "Bot4", "reg_timestamp": "2020-02-03 12:11:53.549Z", "username": "Tester4"}
+    {"email": "user6@bot.com", "name": "Bot6", "reg_timestamp": "2020-02-03 12:12:01.719Z", "username": "Tester6"}
+    {"email": "user7@bot.com", "name": "Bot7", "reg_timestamp": "2020-02-03 12:12:05.848Z", "username": "Tester7"}
+    {"email": "user3@bot.com", "name": "Bot3", "reg_timestamp": "2020-02-03 12:11:48.556Z", "username": "Tester3"}
+ {"email": "user12@bot.com", "name": "Bot12", "reg_timestamp": "2020-02-03 12:12:27.860Z", "username": "Tester12"}
+
+(16 rows)
+
+cqlsh:cbd_video_sharing_melhor> SELECT JSON * FROM Videos_tags;
+
+ [json]
+----------------------------------------
+         {"tag": "NSFW", "video_id": 7}
+         {"tag": "Cute", "video_id": 1}
+         {"tag": "Cute", "video_id": 3}
+  {"tag": "Mindblowing", "video_id": 4}
+ {"tag": "Mindblowing", "video_id": 10}
+       {"tag": "Gaming", "video_id": 8}
+       {"tag": "Gaming", "video_id": 9}
+      {"tag": "Fitness", "video_id": 6}
+      {"tag": "Animals", "video_id": 1}
+          {"tag": "Zoo", "video_id": 1}
+       {"tag": "Final", "video_id": 11}
+    {"tag": "Automated", "video_id": 2}
+    {"tag": "Automated", "video_id": 3}
+    {"tag": "Automated", "video_id": 4}
+    {"tag": "Automated", "video_id": 5}
+    {"tag": "Automated", "video_id": 6}
+    {"tag": "Automated", "video_id": 7}
+    {"tag": "Automated", "video_id": 8}
+    {"tag": "Automated", "video_id": 9}
+   {"tag": "Automated", "video_id": 10}
+       {"tag": "Creepy", "video_id": 2}
+      {"tag": "Fantasy", "video_id": 5}
+
+(22 rows)
+
+cqlsh:cbd_video_sharing_melhor> SELECT JSON * FROM FOllowed_videos_per_author;
+
+ [json]
+----------------------------------------------------------
+    {"user_email": "user8@bot.com", "video_ids": [11, 1]}
+ {"user_email": "user1@bot.com", "video_ids": [11, 1, 2]}
+    {"user_email": "user5@bot.com", "video_ids": [11, 1]}
+   {"user_email": "user10@bot.com", "video_ids": [11, 1]}
+ {"user_email": "user2@bot.com", "video_ids": [11, 1, 6]}
+    {"user_email": "user9@bot.com", "video_ids": [11, 1]}
+ {"user_email": "user4@bot.com", "video_ids": [11, 1, 4]}
+    {"user_email": "user6@bot.com", "video_ids": [11, 1]}
+    {"user_email": "user7@bot.com", "video_ids": [11, 1]}
+    {"user_email": "user3@bot.com", "video_ids": [11, 1]}
+
+(10 rows)
+
+
+cqlsh:cbd_video_sharing_melhor> SELECT JSON * FROM Videos;
+
+ [json]
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            {"id": 5, "author": "user4@bot.com", "upload_timestamp": "2020-02-03 12:26:16.102Z", "description": "Made by a bot", "tags": ["Fantasy", "Automated"], "title": "Fantasy Automated Video"}
+ {"id": 10, "author": "user6@bot.com", "upload_timestamp": "2020-02-03 12:26:38.442Z", "description": "Made by a bot", "tags": ["Mindblowing", "Automated"], "title": "Mindblowing Automated Video 2"}
+                                          {"id": 11, "author": "ds@test.com", "upload_timestamp": "2020-02-03 12:26:41.783Z", "description": "The final video", "tags": ["Final"], "title": "The end"}
+                       {"id": 1, "author": "ds@test.com", "upload_timestamp": "2020-02-03 12:25:56.715Z", "description": "A day at the zoo", "tags": ["Zoo", "Cute", "Animals"], "title": "Zoo Video"}
+              {"id": 8, "author": "user2@bot.com", "upload_timestamp": "2020-02-03 12:26:29.094Z", "description": "Made by a bot", "tags": ["Gaming", "Automated"], "title": "Gaming Automated Video"}
+              {"id": 2, "author": "user1@bot.com", "upload_timestamp": "2020-02-03 12:26:00.660Z", "description": "Made by a bot", "tags": ["Creepy", "Automated"], "title": "Creepy Automated Video"}
+    {"id": 4, "author": "user2@bot.com", "upload_timestamp": "2020-02-03 12:26:11.233Z", "description": "Made by a bot", "tags": ["Mindblowing", "Automated"], "title": "Mindblowing Automated Video"}
+                 {"id": 7, "author": "user12@bot.com", "upload_timestamp": "2020-02-03 12:26:25.114Z", "description": "Made by a bot", "tags": ["NSFW", "Automated"], "title": "NSFW Automated Video"}
+           {"id": 6, "author": "user10@bot.com", "upload_timestamp": "2020-02-03 12:26:19.779Z", "description": "Made by a bot", "tags": ["Fitness", "Automated"], "title": "Fitness Automated Video"}
+            {"id": 9, "author": "user2@bot.com", "upload_timestamp": "2020-02-03 12:26:33.813Z", "description": "Made by a bot", "tags": ["Gaming", "Automated"], "title": "Gaming Automated Video 2"}
+                  {"id": 3, "author": "user2@bot.com", "upload_timestamp": "2020-02-03 12:26:05.135Z", "description": "Made by a bot", "tags": ["Cute", "Automated"], "title": "Cute Automated Video"}
+
+(11 rows)
+
+cqlsh:cbd_video_sharing_melhor> SELECT JSON * FROM Videos_per_tag;
+
+ [json]
+-----------------------------------------------------------------
+                               {"tag": "NSFW", "video_ids": [7]}
+                            {"tag": "Cute", "video_ids": [1, 3]}
+                    {"tag": "Mindblowing", "video_ids": [10, 4]}
+                          {"tag": "Gaming", "video_ids": [8, 9]}
+                            {"tag": "Fitness", "video_ids": [6]}
+                            {"tag": "Animals", "video_ids": [1]}
+                                {"tag": "Zoo", "video_ids": [1]}
+                             {"tag": "Final", "video_ids": [11]}
+ {"tag": "Automated", "video_ids": [5, 10, 8, 2, 4, 7, 6, 9, 3]}
+                             {"tag": "Creepy", "video_ids": [2]}
+                            {"tag": "Fantasy", "video_ids": [5]}
+
+(11 rows)
+
+cqlsh:cbd_video_sharing_melhor> SELECT JSON * FROM Comments_per_username;
+
+ [json]
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+                 {"user_username": "Bot2", "upload_timestamp": "2020-02-03 13:09:44.114Z", "comment": "Goodbye", "user_email": "user2@bot.com", "video_id": 11}
+        {"user_username": "Bot2", "upload_timestamp": "2020-02-03 13:09:06.326Z", "comment": "Automated Comment", "user_email": "user2@bot.com", "video_id": 1}
+                 {"user_username": "Bot1", "upload_timestamp": "2020-02-03 13:09:40.107Z", "comment": "Goodbye", "user_email": "user1@bot.com", "video_id": 11}
+        {"user_username": "Bot1", "upload_timestamp": "2020-02-03 13:09:01.982Z", "comment": "Automated Comment", "user_email": "user1@bot.com", "video_id": 1}
+ {"user_username": "Bot10", "upload_timestamp": "2020-02-03 13:09:35.880Z", "comment": "Good Video Fellow Bot", "user_email": "user10@bot.com", "video_id": 10}
+                 {"user_username": "Bot5", "upload_timestamp": "2020-02-03 13:10:00.575Z", "comment": "Goodbye", "user_email": "user5@bot.com", "video_id": 11}
+    {"user_username": "Bot5", "upload_timestamp": "2020-02-03 13:09:26.335Z", "comment": "Good Video Fellow Bot", "user_email": "user5@bot.com", "video_id": 6}
+    {"user_username": "Bot8", "upload_timestamp": "2020-02-03 13:09:31.060Z", "comment": "Good Video Fellow Bot", "user_email": "user8@bot.com", "video_id": 9}
+                 {"user_username": "Bot3", "upload_timestamp": "2020-02-03 13:09:50.331Z", "comment": "Goodbye", "user_email": "user3@bot.com", "video_id": 11}
+    {"user_username": "Bot3", "upload_timestamp": "2020-02-03 13:09:16.036Z", "comment": "Good Video Fellow Bot", "user_email": "user3@bot.com", "video_id": 2}
+        {"user_username": "Bot3", "upload_timestamp": "2020-02-03 13:09:11.490Z", "comment": "Automated Comment", "user_email": "user3@bot.com", "video_id": 1}
+                 {"user_username": "Bot4", "upload_timestamp": "2020-02-03 13:09:55.278Z", "comment": "Goodbye", "user_email": "user4@bot.com", "video_id": 11}
+    {"user_username": "Bot4", "upload_timestamp": "2020-02-03 13:09:21.564Z", "comment": "Good Video Fellow Bot", "user_email": "user4@bot.com", "video_id": 2}
+
+(13 rows)
+
+cqlsh:cbd_video_sharing_melhor> SELECT JSON * FROM Comments_per_video;
+
+ [json]
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"video_id": 10, "upload_timestamp": "2020-02-03 13:09:35.885Z", "comment": "Good Video Fellow Bot", "user_email": "user10@bot.com", "user_username": "Bot10"}
+                 {"video_id": 11, "upload_timestamp": "2020-02-03 13:10:00.579Z", "comment": "Goodbye", "user_email": "user5@bot.com", "user_username": "Bot5"}
+                 {"video_id": 11, "upload_timestamp": "2020-02-03 13:09:55.281Z", "comment": "Goodbye", "user_email": "user4@bot.com", "user_username": "Bot4"}
+                 {"video_id": 11, "upload_timestamp": "2020-02-03 13:09:50.335Z", "comment": "Goodbye", "user_email": "user3@bot.com", "user_username": "Bot3"}
+                 {"video_id": 11, "upload_timestamp": "2020-02-03 13:09:44.117Z", "comment": "Goodbye", "user_email": "user2@bot.com", "user_username": "Bot2"}
+                 {"video_id": 11, "upload_timestamp": "2020-02-03 13:09:40.110Z", "comment": "Goodbye", "user_email": "user1@bot.com", "user_username": "Bot1"}
+        {"video_id": 1, "upload_timestamp": "2020-02-03 13:09:11.493Z", "comment": "Automated Comment", "user_email": "user3@bot.com", "user_username": "Bot3"}
+        {"video_id": 1, "upload_timestamp": "2020-02-03 13:09:06.329Z", "comment": "Automated Comment", "user_email": "user2@bot.com", "user_username": "Bot2"}
+        {"video_id": 1, "upload_timestamp": "2020-02-03 13:09:01.983Z", "comment": "Automated Comment", "user_email": "user1@bot.com", "user_username": "Bot1"}
+    {"video_id": 2, "upload_timestamp": "2020-02-03 13:09:21.567Z", "comment": "Good Video Fellow Bot", "user_email": "user4@bot.com", "user_username": "Bot4"}
+    {"video_id": 2, "upload_timestamp": "2020-02-03 13:09:16.040Z", "comment": "Good Video Fellow Bot", "user_email": "user3@bot.com", "user_username": "Bot3"}
+    {"video_id": 6, "upload_timestamp": "2020-02-03 13:09:26.338Z", "comment": "Good Video Fellow Bot", "user_email": "user5@bot.com", "user_username": "Bot5"}
+    {"video_id": 9, "upload_timestamp": "2020-02-03 13:09:31.064Z", "comment": "Good Video Fellow Bot", "user_email": "user8@bot.com", "user_username": "Bot8"}
+
+(13 rows)
+
+cqlsh:cbd_video_sharing_melhor> SELECT JSON * FROM Events_per_author_in_video;
+
+ [json]
+-------------------------------------------------------------------------------------------------------------------------------------------
+  {"user_email": "user10@bot.com", "video_id": 10, "real_timestamp": "2020-02-03 13:20:56.254Z", "video_timestamp": 300, "action": "Stop"}
+  {"user_email": "user10@bot.com", "video_id": 10, "real_timestamp": "2020-02-03 13:20:48.760Z", "video_timestamp": 242, "action": "Play"}
+ {"user_email": "user10@bot.com", "video_id": 10, "real_timestamp": "2020-02-03 13:20:43.892Z", "video_timestamp": 242, "action": "Pause"}
+  {"user_email": "user10@bot.com", "video_id": 10, "real_timestamp": "2020-02-03 13:20:36.894Z", "video_timestamp": 124, "action": "Play"}
+ {"user_email": "user10@bot.com", "video_id": 10, "real_timestamp": "2020-02-03 13:20:32.319Z", "video_timestamp": 124, "action": "Pause"}
+    {"user_email": "user10@bot.com", "video_id": 10, "real_timestamp": "2020-02-03 13:20:27.386Z", "video_timestamp": 0, "action": "Play"}
+    {"user_email": "user4@bot.com", "video_id": 11, "real_timestamp": "2020-02-03 13:19:20.357Z", "video_timestamp": 20, "action": "Stop"}
+     {"user_email": "user4@bot.com", "video_id": 11, "real_timestamp": "2020-02-03 13:19:14.334Z", "video_timestamp": 0, "action": "Play"}
+    {"user_email": "user2@bot.com", "video_id": 1, "real_timestamp": "2020-02-03 13:19:04.082Z", "video_timestamp": 120, "action": "Stop"}
+     {"user_email": "user2@bot.com", "video_id": 1, "real_timestamp": "2020-02-03 13:18:58.061Z", "video_timestamp": 98, "action": "Play"}
+    {"user_email": "user2@bot.com", "video_id": 1, "real_timestamp": "2020-02-03 13:18:54.945Z", "video_timestamp": 98, "action": "Pause"}
+      {"user_email": "user2@bot.com", "video_id": 1, "real_timestamp": "2020-02-03 13:18:44.942Z", "video_timestamp": 0, "action": "Play"}
+     {"user_email": "user6@bot.com", "video_id": 11, "real_timestamp": "2020-02-03 13:19:31.173Z", "video_timestamp": 0, "action": "Stop"}
+     {"user_email": "user6@bot.com", "video_id": 11, "real_timestamp": "2020-02-03 13:19:27.323Z", "video_timestamp": 0, "action": "Play"}
+    {"user_email": "user9@bot.com", "video_id": 11, "real_timestamp": "2020-02-03 13:19:47.608Z", "video_timestamp": 20, "action": "Stop"}
+     {"user_email": "user9@bot.com", "video_id": 11, "real_timestamp": "2020-02-03 13:19:38.267Z", "video_timestamp": 0, "action": "Play"}
+    {"user_email": "user4@bot.com", "video_id": 5, "real_timestamp": "2020-02-03 13:20:14.789Z", "video_timestamp": 150, "action": "Stop"}
+   {"user_email": "user4@bot.com", "video_id": 5, "real_timestamp": "2020-02-03 13:20:09.563Z", "video_timestamp": 150, "action": "Pause"}
+     {"user_email": "user4@bot.com", "video_id": 5, "real_timestamp": "2020-02-03 13:20:00.224Z", "video_timestamp": 51, "action": "Play"}
+
+(19 rows)
+
+cqlsh:cbd_video_sharing_melhor> SELECT JSON * FROM Followers_per_video;
+
+ [json]
+--------------------------------------------------
+ {"video_id": 11, "user_email": "user10@bot.com"}
+  {"video_id": 11, "user_email": "user1@bot.com"}
+  {"video_id": 11, "user_email": "user2@bot.com"}
+  {"video_id": 11, "user_email": "user3@bot.com"}
+  {"video_id": 11, "user_email": "user4@bot.com"}
+  {"video_id": 11, "user_email": "user5@bot.com"}
+  {"video_id": 11, "user_email": "user6@bot.com"}
+  {"video_id": 11, "user_email": "user7@bot.com"}
+  {"video_id": 11, "user_email": "user8@bot.com"}
+  {"video_id": 11, "user_email": "user9@bot.com"}
+  {"video_id": 1, "user_email": "user10@bot.com"}
+   {"video_id": 1, "user_email": "user1@bot.com"}
+   {"video_id": 1, "user_email": "user2@bot.com"}
+   {"video_id": 1, "user_email": "user3@bot.com"}
+   {"video_id": 1, "user_email": "user4@bot.com"}
+   {"video_id": 1, "user_email": "user5@bot.com"}
+   {"video_id": 1, "user_email": "user6@bot.com"}
+   {"video_id": 1, "user_email": "user7@bot.com"}
+   {"video_id": 1, "user_email": "user8@bot.com"}
+   {"video_id": 1, "user_email": "user9@bot.com"}
+   {"video_id": 2, "user_email": "user1@bot.com"}
+   {"video_id": 4, "user_email": "user4@bot.com"}
+   {"video_id": 6, "user_email": "user2@bot.com"}
+
+(23 rows)
+
+cqlsh:cbd_video_sharing_melhor> SELECT JSON * FROM Ratings_per_video;
+
+ [json]
+-----------------------------------------------
+  {"video_id": 11, "value": 1, "review_id": 9}
+ {"video_id": 11, "value": 1, "review_id": 14}
+  {"video_id": 11, "value": 2, "review_id": 8}
+ {"video_id": 11, "value": 2, "review_id": 12}
+ {"video_id": 11, "value": 2, "review_id": 15}
+ {"video_id": 11, "value": 4, "review_id": 11}
+ {"video_id": 11, "value": 5, "review_id": 10}
+ {"video_id": 11, "value": 6, "review_id": 13}
+   {"video_id": 1, "value": 4, "review_id": 4}
+   {"video_id": 1, "value": 5, "review_id": 1}
+   {"video_id": 1, "value": 5, "review_id": 2}
+   {"video_id": 1, "value": 5, "review_id": 3}
+   {"video_id": 1, "value": 5, "review_id": 5}
+   {"video_id": 2, "value": 2, "review_id": 6}
+   {"video_id": 2, "value": 3, "review_id": 7}
+
+(15 rows)
+
+cqlsh:cbd_video_sharing_melhor> SELECT JSON * FROM Videos_per_author;
+
+ [json]
+--------------------------------------------------------------------------------------------------------------------
+   {"user_email": "user1@bot.com", "upload_timestamp": "2020-02-03 12:26:00.000Z", "video_id": 2, "author": "Bot1"}
+ {"user_email": "user10@bot.com", "upload_timestamp": "2020-02-03 12:26:19.000Z", "video_id": 6, "author": "Bot10"}
+   {"user_email": "user2@bot.com", "upload_timestamp": "2020-02-03 12:26:05.000Z", "video_id": 3, "author": "Bot2"}
+   {"user_email": "user2@bot.com", "upload_timestamp": "2020-02-03 12:26:11.000Z", "video_id": 4, "author": "Bot2"}
+   {"user_email": "user2@bot.com", "upload_timestamp": "2020-02-03 12:26:29.000Z", "video_id": 8, "author": "Bot2"}
+   {"user_email": "user2@bot.com", "upload_timestamp": "2020-02-03 12:26:33.000Z", "video_id": 9, "author": "Bot2"}
+  {"user_email": "ds@test.com", "upload_timestamp": "2020-02-03 12:25:56.000Z", "video_id": 1, "author": "FenixDS"}
+ {"user_email": "ds@test.com", "upload_timestamp": "2020-02-03 12:26:41.000Z", "video_id": 11, "author": "FenixDS"}
+   {"user_email": "user4@bot.com", "upload_timestamp": "2020-02-03 12:26:16.000Z", "video_id": 5, "author": "Bot4"}
+  {"user_email": "user6@bot.com", "upload_timestamp": "2020-02-03 12:26:38.000Z", "video_id": 10, "author": "Bot6"}
+ {"user_email": "user12@bot.com", "upload_timestamp": "2020-02-03 12:26:25.000Z", "video_id": 7, "author": "Bot12"}
+
+(11 rows)

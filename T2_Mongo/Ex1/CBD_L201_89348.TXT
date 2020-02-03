@@ -1,0 +1,166 @@
+// This command is used to create and switch to a new DB
+> use testDB   #Create and switch to a new DB named TestDB
+switched to db testDB
+
+// This command returns the name of the database you're currently using
+> db
+testDB
+
+// Check what databases exist (Note that our newly created DB doesn't show up yet because its completely empty!)
+> show dbs
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+
+// Drops the database being currently used
+> db.dropDatabase()
+
+// Because we just deleted our db on the last operation, we need to create it again
+> use testDB
+switched to db testDB
+
+// db.createCollection(name, options) is used to create collection. The options field allows a user to specify parameters like memory size and indexing.
+// Note that if you're using Robo3t, the object will be displayed in the gui and not in the form of a dictionary
+// Also, pay attention to the fact that: 
+//    > In MongoDB, you don't need to create collection. MongoDB creates collection automatically, when you insert a document.
+> db.createCollection("testcollection") #Create a new collection called testcollection in our current DB
+{  "ok"  :  1  }
+
+// Show all collections in the currently selected Database
+> show collections
+testcollection
+
+// Now that we actually added something to our DB, using the show dbs command will actually show our newly created DB
+> show dbs
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+testDB  0.000GB
+
+// db.<collect_name>.drop() drops the collection specified in <collection_name>
+>db.testcollection.drop()  #Drop the collection called testcollection present in our current DB
+true
+
+// To insert data into a MongoDB collection, you need to use the **insert()** or **save()** method.
+// Using the **insert** method boils down to **db.COLLECTION_NAME.insert(DOCUMENT)**
+// In regards to the **save()** method:
+//    > To insert the document you can use **db.post.save(document)** also. If you don't specify **_id** in the document then **save()** method will work same as **insert()** method. If you specify _id then it will replace whole data of document containing _id as specified in save() method.
+> db.testcollection.insert({
+   _id: 0,
+   name: 'DS', 
+   description: 'Hey demons, it\'s me, ya boi',
+   team: "Pirocanhoes"
+}) #Insert a new document into the collection testcollection. This document will have id 0 and 3 fields - name, description and team (each with a value)
+Inserted 1 record(s) in 7ms
+
+// To insert **multiple documents** in a single query, you can pass an array of documents in insert() command.
+> db.testcollection.insert([
+   {_id: 1,
+    name: 'André Baião', 
+    description: 'Acoreano',
+    team: "Pirocanhoes"},
+    {_id: 2,
+    name: 'Chico com Ch', 
+    description: 'Minimeu',
+    team: "FTW"}
+    ]) #Insert 2 new documents into the collection testcollection. These new documents will have id 1 and 2 and 3 fields each - name, description and team (each with a value)
+Inserted 1 record(s) in 3ms
+
+// To query data from MongoDB collection, you need to use MongoDB's **find()** method.
+> db.testcollection.find() #Show all documents in the testcollection collection in our current DB
+{ "_id" : 0, "name" : "DS", "description" : "Hey demons, it's me, ya boi", "team": "Pirocanhoes" }
+{ "_id" : 1, "name" : "André Baião", "description" : "Acoriano", "team": "Pirocanhoes" }
+{ "_id" : 2, "name" : "Chico com Ch", "description" : "Minimeu", "team": "FTW" }
+
+// You can also use the **prety()** method to format the way the query gets displayed:
+> db.testcollection.find().pretty() #Show all documents in the testcollection collection in our current DB in a formatted/prettier way
+{ "_id" : 0, "name" : "DS", "description" : "Hey demons, it's me, ya boi", "team": "Pirocanhoes" }
+{
+	"_id" : 1,
+	"name" : "André Baião",
+	"description" : "Acoriano"
+	"team": "Pirocanhoes"
+}
+{
+	"_id" : 2,
+	"name" : "Chico com Ch",
+	"description" : "Minimeu"
+	"team": "FTW"
+}
+
+// To search for a specific Document, you can just put one of the document's fields in the find() method, like so:
+>db.testcollection.find({"_id":0}) #Find the document with id 0 in the collection testcollection
+{ "_id" : 0, "name" : "DS", "description" : "Hey demons, it's me, ya boi", "team": "Pirocanhoes" }
+
+>db.testcollection.find({"name": "Chico com Ch"}) #Find the document whose name field has the value "Chico com Ch" in the collection testcollection
+{ "_id" : 2, "name" : "Chico com Ch", "description" : "Minimeu", "team": "FTW" }
+
+// If you only want to show **SOME** of the fields you can use the find() method like so:
+> db.testcollection.find({}, {name: 1, team: 1}) #Find all documents in the testcollection collection but include only the name and team fields
+{ "_id" : 0, "name" : "DS","team": "Pirocanhoes" }
+{ "_id" : 1, "name" : "André Baião", "team": "Pirocanhoes" }
+{ "_id" : 2, "name" : "Chico com Ch", "team": "FTW" }
+
+// And if instead of including the fields you want to **exclude them** all you've gotta do is change that 1 to a 0
+> db.testcollection.find({}, {description: 0}) #Find all documents in the testcollection collection but exclude the description field
+{ "_id" : 0, "name" : "DS","team": "Pirocanhoes" }
+{ "_id" : 1, "name" : "André Baião", "team": "Pirocanhoes" }
+{ "_id" : 2, "name" : "Chico com Ch", "team": "FTW" }
+
+// You can also pass multiple keys and mix them with **AND** and/or **OR** like so:
+> db.testcollection.find({$or: [{team: "Pirocanhoes"},{team: "FTW"}]}) #Find all documents in the testcollection collection whose team field has the value "Pirocanhoes" or "FTW"
+{ "_id" : 0, "name" : "DS", "description" : "Hey", "team" : "Pirocanhoes" }
+{ "_id" : 1, "name" : "Andre", "description" : "acoreano", "team" : "Pirocanhoes" }
+{ "_id" : 2, "name" : "Chico", "description" : "minimeu", "team" : "FTW" }
+
+> db.testcollection.find({$and: [{team: "Pirocanhoes"},{name: "DS"}]}) #Find all documents in the testcollection collection whose team field has the value "Pirocanhoes" and whose name field has the value "DS"
+{ "_id" : 0, "name" : "DS", "description" : "Hey", "team" : "Pirocanhoes" }
+
+// There are also commands for querying **Greater than**, **Lesser than**, **Not Equals**, etc etc
+// As a couple of examples, you can have:
+> db.testcollection.find({"_id": {$gt: 0}}) #Find all documents in the testcollection collection which have an ID field greater than 0
+{ "_id" : 1, "name" : "Andre", "description" : "acoreano", "team" : "Pirocanhoes" }
+{ "_id" : 2, "name" : "Chico", "description" : "minimeu", "team" : "FTW" }
+
+> db.testcollection.find({"_id": {$ne: 1}}) #Find all documents in the testcollection collection whose ID is not equal to 1
+{ "_id" : 0, "name" : "DS", "description" : "Hey", "team" : "Pirocanhoes" }
+{ "_id" : 2, "name" : "Chico", "description" : "minimeu", "team" : "FTW" }
+
+// There are 2 ways to update a document in MongoDB, using UPDATE or SAVE:
+// Firstly there's db.COLLECTION_NAME.update(SELECTION_CRITERIA, UPDATED_DATA):
+// 	-	Updates the values in the existing document
+//    -  NOTE: By default, MongoDB will only update a single document. To update multiple documents, you need to set a parameter 'multi' to true.
+> db.testcollection.update({'name':'Chico'},{$set:{'team':'Pirocanhoes'}}) #Update the first document found in testcollection whose name is "Chico", setting it's team field's value to "Pirocanhoes"
+Updated 1 existing record(s) in 5ms
+
+> db.testcollection.update({'_id':{$gte: 0}}, {$set:{'description':'Winner of the DETIgameroom'}},{multi:true}) #Update all documents in the testcollection collection with an id greater or equal to 0, changing their description field's value
+Updated 3 existing record(s) in 23ms
+
+// And secondly you also have db.COLLECTION_NAME.save({_id:ObjectId(),NEW_DATA}):
+// 	-	Replaces the existing document with the document passed in the passed as argument
+> db.testcollection.save({"_id" : 2, "name":"Rafa Simoes", "description": "MongoDB Creator", "team": "Pirocanhoes"}) #Replace the document in the testcollection collection with id = 2 with the one with a name, description and team fields equal to the ones specified
+Updated 1 existing record(s) in 1ms
+
+// Deleting a document in MongoDB is as simple as using the Remove method.
+// This method has 2, optional, criteria:
+//    - deletion criteria − (Optional) deletion criteria according to documents will be removed.
+//    - justOne − (Optional) if set to true or 1, then remove only one document. This is used if multiple documents match your deletion criteria and you want to delete ONLY THE FIRST ONE
+> db.testcollection.remove({'name':'Rafa Simoes'}) #Remove all documents from testcollection whose name field's value is equal to "Rafa Simoes"
+Removed 1 record(s) in 2ms
+
+> db.testcollection.remove({'team':'Pirocanhoes'},1) #Remove just the first document found in the testcollection collection whose team value is Pirocanhoes
+Removed 1 record(s) in 1ms
+
+// To create an index you need to use ensureIndex() method of MongoDB.
+// This method's syntax looks like this : `db.COLLECTION_NAME.ensureIndex({KEY:1})`. KEY corresponds to the field we want to Index, 1 means we want the field to be indexed in Ascending order (if we were to use -1 it'd mean we wanted the field to be stored in descending order). 
+// Note that we can pass multiple KEYs to index multiple fields at once
+// The ensureIndex() method also accepts list of options (which are optional).
+> db.testcollection.ensureIndex({"name":1})  #Create an index on the field "name"
+{
+	"createdCollectionAutomatically" : true,
+	"numIndexesBefore" : 1,
+	"numIndexesAfter" : 2,
+	"ok" : 1
+}
+
+//For more information on MongoDB characteristics, other code examples and more commentary please refer to the readme.md file Section 3 - Initial MongoDB Interactions

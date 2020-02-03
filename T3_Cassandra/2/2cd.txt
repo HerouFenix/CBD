@@ -1,0 +1,200 @@
+### c)
+
+**A. Pesquisa de todos os vídeos de determinado autor (e.x todos os videos do user DS)**
+```
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Videos_per_author WHERE user_email = 'ds@test.com';
+
+ user_email  | upload_timestamp                | video_id | author
+-------------+---------------------------------+----------+---------
+ ds@test.com | 2020-02-03 12:25:56.000000+0000 |        1 | FenixDS
+ ds@test.com | 2020-02-03 12:26:41.000000+0000 |       11 | FenixDS
+
+(2 rows)
+```
+
+**B. Pesquisa de comentários por utilizador, ordenado inversamente pela data (ex. user Bot4)**
+```
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Comments_per_username WHERE user_username = 'Bot4';
+
+ user_username | upload_timestamp                | comment               | user_email    | video_id
+---------------+---------------------------------+-----------------------+---------------+----------
+          Bot4 | 2020-02-03 13:09:55.278000+0000 |               Goodbye | user4@bot.com |       11
+          Bot4 | 2020-02-03 13:09:21.564000+0000 | Good Video Fellow Bot | user4@bot.com |        2
+
+(2 rows)
+```
+
+**C. Pesquisa de comentários por vídeos, ordenado inversamente pela data (ex. video ZooTrip - id = 1)**
+```
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Comments_per_video WHERE video_id = 1;
+
+ video_id | upload_timestamp                | comment           | user_email    | user_username
+----------+---------------------------------+-------------------+---------------+---------------
+        1 | 2020-02-03 13:09:11.493000+0000 | Automated Comment | user3@bot.com |          Bot3
+        1 | 2020-02-03 13:09:06.329000+0000 | Automated Comment | user2@bot.com |          Bot2
+        1 | 2020-02-03 13:09:01.983000+0000 | Automated Comment | user1@bot.com |          Bot1
+
+(3 rows)
+
+```
+
+**D. Pesquisa do rating médio de um vídeo e quantas vezes foi votado; (ex. video  The End - id = 11)**
+```
+cqlsh:cbd_video_sharing_melhor> SELECT avg(value) as Average, count(value) as NoReviews FROM Ratings_per_video WHERE video_id = 11;
+
+ average | noreviews
+---------+-----------
+       2 |         8
+
+(1 rows)
+```
+
+### d)
+**1. Os últimos 3 comentários introduzidos para um vídeo;**
+```
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Comments_per_video WHERE video_id = 1 LIMIT 3;
+
+ video_id | upload_timestamp                | comment           | user_email    | user_username
+----------+---------------------------------+-------------------+---------------+---------------
+        1 | 2020-02-03 13:09:11.493000+0000 | Automated Comment | user3@bot.com |          Bot3
+        1 | 2020-02-03 13:09:06.329000+0000 | Automated Comment | user2@bot.com |          Bot2
+        1 | 2020-02-03 13:09:01.983000+0000 | Automated Comment | user1@bot.com |          Bot1
+
+(3 rows)
+```
+
+**2. Lista das tags de determinado vídeo;**
+```
+cqlsh:cbd_video_sharing_melhor> SELECT tags FROM Videos WHERE id = 7;
+
+ tags
+-----------------------
+ ['NSFW', 'Automated']
+
+(1 rows)
+```
+
+**3. Todos os vídeos com a tag Aveiro;**
+```
+#Note, esqueci-me de adicionar um video com a Tag Aveiro, por isso é que não foi possivel encontrar nenhuma row...
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Videos_per_tag WHERE tag='Aveiro'; 
+
+ tag | video_ids
+-----+-----------
+
+(0 rows)
+```
+
+**4. Os últimos 5 eventos de determinado vídeo realizados por um utilizador;**
+```
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Events_per_author_in_video WHERE user_email = 'user10@bot.com' AND video_id = 10 LIMIT 5;
+
+ user_email     | video_id | real_timestamp                  | video_timestamp | action
+----------------+----------+---------------------------------+-----------------+--------
+ user10@bot.com |       10 | 2020-02-03 13:20:56.254000+0000 |             300 |   Stop
+ user10@bot.com |       10 | 2020-02-03 13:20:48.760000+0000 |             242 |   Play
+ user10@bot.com |       10 | 2020-02-03 13:20:43.892000+0000 |             242 |  Pause
+ user10@bot.com |       10 | 2020-02-03 13:20:36.894000+0000 |             124 |   Play
+ user10@bot.com |       10 | 2020-02-03 13:20:32.319000+0000 |             124 |  Pause
+
+(5 rows)
+```
+
+**5. Vídeos partilhados por determinado utilizador (maria1987, por exemplo) num
+determinado período de tempo (Agosto de 2017, por exemplo);**
+```
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Videos_per_author WHERE user_email = 'ds@test.com' AND upload_timestamp < '2020-02-03 12:26:00' ;
+
+ user_email  | upload_timestamp                | video_id | author
+-------------+---------------------------------+----------+---------
+ ds@test.com | 2020-02-03 12:25:56.000000+0000 |        1 | FenixDS
+
+(1 rows)
+```
+
+**6. Os últimos 10 vídeos, ordenado inversamente pela data da partilhada;**
+```
+Impossivel porque Cassandra não permite Global Querying. Seria possivel se se quisesse os ultimos 10 videos de um dado user
+```
+
+**7. Todos os seguidores (followers) de determinado vídeo;**
+```
+cqlsh:cbd_video_sharing_melhor> Select * from followers_per_video WHERE video_id = 11;
+
+ video_id | user_email
+----------+----------------
+       11 | user10@bot.com
+       11 |  user1@bot.com
+       11 |  user2@bot.com
+       11 |  user3@bot.com
+       11 |  user4@bot.com
+       11 |  user5@bot.com
+       11 |  user6@bot.com
+       11 |  user7@bot.com
+       11 |  user8@bot.com
+       11 |  user9@bot.com
+
+(10 rows)
+```
+
+
+**8. Todos os comentários (dos vídeos) que determinado utilizador está a seguir (following);**
+```
+#Para isto teriamos que primeiro realizar uma query para saber os videos que um user está a seguir:
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Followed_videos_per_author WHERE user_email = 'user4@bot.com';
+
+ user_email    | video_ids
+---------------+------------
+ user4@bot.com | [11, 1, 4]
+
+(1 rows)
+
+#Com isto teriamos agora que realizar a seguinte query por cada valor no array video ids:
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM comments_per_video WHERE video_id = 11;
+
+ video_id | upload_timestamp                | comment | user_email    | user_username
+----------+---------------------------------+---------+---------------+---------------
+       11 | 2020-02-03 13:10:00.579000+0000 | Goodbye | user5@bot.com |          Bot5
+       11 | 2020-02-03 13:09:55.281000+0000 | Goodbye | user4@bot.com |          Bot4
+       11 | 2020-02-03 13:09:50.335000+0000 | Goodbye | user3@bot.com |          Bot3
+       11 | 2020-02-03 13:09:44.117000+0000 | Goodbye | user2@bot.com |          Bot2
+       11 | 2020-02-03 13:09:40.110000+0000 | Goodbye | user1@bot.com |          Bot1
+
+(5 rows)
+
+```
+
+**9. Os 5 vídeos com maior rating;**
+```
+Impossivel porque Cassandra não permite Global Querying. 
+```
+
+
+**10. Uma query que retorne todos os vídeos e que mostre claramente a forma pela qual estão
+ordenados;**
+```
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Videos WHERE id in (4,5,6);
+
+ id | upload_timestamp                | author         | description   | tags                     | title
+----+---------------------------------+----------------+---------------+--------------------------+-------------------------
+  4 | 2020-02-03 14:04:19.440000+0000 |  user4@bot.com | Made by a bot | ['Fantasy', 'Automated'] | Fantasy Automated Video
+  5 | 2020-02-03 14:04:26.677000+0000 | user10@bot.com | Made by a bot | ['Fitness', 'Automated'] | Fitness Automated Video
+  6 | 2020-02-03 14:04:34.994000+0000 | user12@bot.com | Made by a bot |    ['NSFW', 'Automated'] |    NSFW Automated Video
+
+(3 rows)
+```
+
+
+**11. Lista com as Tags existentes e o número de vídeos catalogados com cada uma delas;**
+```
+#Um bocado tricky visto que não estamos a especificar nenhuma partitioning key...
+#Uma possivel maneira seria saber a priori o nome de cada tag e realizar a seguinte query para cada uma das Tags, e programaticamente adicionar a uma lista:
+
+cqlsh:cbd_video_sharing_melhor> SELECT tag, COUNT(video_id) as count FROM Videos_tags where tag='Automated';
+
+ tag       | count
+-----------+-------
+ Automated |     9
+
+(1 rows)
+```

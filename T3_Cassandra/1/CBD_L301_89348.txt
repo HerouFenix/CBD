@@ -1,0 +1,191 @@
+Nota: Para mais comentarios sobre os comandos, ver a secção "Initial Cassandra Interactions" no readme.md
+
+cqlsh> CREATE KEYSPACE cbd_tutorial
+   ... WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 3};
+
+
+cqlsh> DESCRIBE keyspaces;
+
+system_schema  system              system_traces
+system_auth    system_distributed  cbd_tutorial 
+
+
+cqlsh> USE cbd_tutorial;
+cqlsh:cbd_tutorial> 
+
+cqlsh:cbd_tutorial> ALTER KEYSPACE cbd_tutorial WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 5};
+
+cqlsh> DROP KEYSPACE cbd_tutorial;
+
+cqlsh> DESCRIBE keyspaces;
+
+system_schema  system_auth  system  system_distributed  system_traces
+
+cqlsh:cbd_tutorial> CREATE COLUMNFAMILY player(
+                ... player_id int PRIMARY KEY,
+                ... player_name text,
+                ... player_age int,
+                ... player_rank int
+                ... );
+                
+cqlsh:cbd_tutorial> select * from players;
+
+ player_id | player_age | player_name | player_rank
+-----------+------------+-------------+-------------
+
+(0 rows)
+
+cqlsh:cbd_tutorial> ALTER TABLE player
+                ... DROP player_rank;
+cqlsh:cbd_tutorial> ALTER COLUMNFAMILY player
+                ... ADD player_score double;
+cqlsh:cbd_tutorial> SELECT * FROM player;
+
+ player_id | player_age | player_name | player_score
+-----------+------------+-------------+--------------
+
+(0 rows)
+
+cqlsh:cbd_tutorial> DROP COLUMNFAMILY player;
+
+cqlsh:cbd_tutorial> DESCRIBE COLUMNFAMILIES;
+
+<empty>
+
+cqlsh:cbd_tutorial> TRUNCATE player;
+
+cqlsh:cbd_tutorial> SELECT * from player;
+
+ player_id | player_age | player_name | player_score
+-----------+------------+-------------+--------------
+
+(0 rows)
+
+cqlsh:cbd_tutorial> SELECT * from player;
+
+ player_id | player_age | player_name | player_score
+-----------+------------+-------------+--------------
+
+(0 rows)
+
+cqlsh:cbd_tutorial> INSERT INTO player (player_id, player_age, player_name, player_score)
+                ... VALUES (1, 20, 'DS', 69);
+cqlsh:cbd_tutorial> INSERT INTO player (player_id, player_name, player_score)
+                ... VALUES (2, 'Chico Ace', 80.420);
+cqlsh:cbd_tutorial> INSERT INTO player (player_id, player_name)
+                ... VALUES (3, 'Açores');
+                
+cqlsh:cbd_tutorial> SELECT * FROM player;
+
+ player_id | player_age | player_name | player_score
+-----------+------------+-------------+--------------
+         1 |         20 |          DS |           69
+         2 |       null |   Chico Ace |        80.42
+         3 |       null |      Açores |         null
+
+(3 rows)
+
+cqlsh:cbd_tutorial> SELECT * FROM player;
+
+ player_id | player_age | player_name | player_score
+-----------+------------+-------------+--------------
+         1 |         20 |          DS |           69
+         2 |       null |   Chico Ace |        80.42
+         3 |       null |      Açores |         null
+
+(3 rows)
+
+cqlsh:cbd_tutorial> UPDATE player
+                ... SET player_score = 100.01
+                ... WHERE player_id = 3;
+
+cqlsh:cbd_tutorial> UPDATE player
+                ... SET player_age = 19
+                ... WHERE player_name = 'Chico Ace';
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Some partition key parts are missing: player_id"
+
+cqlsh:cbd_tutorial> UPDATE player
+                ... SET player_age = 19
+                ... WHERE player_id = 2 AND player_name = 'Chico Ace';
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Non PRIMARY KEY columns found in where clause: player_name "
+
+cqlsh:cbd_tutorial> SELECT * FROM player;
+
+ player_id | player_age | player_name | player_score
+-----------+------------+-------------+--------------
+         1 |         20 |          DS |           69
+         2 |       null |   Chico Ace |        80.42
+         3 |       null |      Açores |       100.01
+
+(3 rows)
+
+cqlsh:cbd_tutorial> SELECT * FROM player;
+
+ player_id | player_age | player_name | player_score
+-----------+------------+-------------+--------------
+         1 |         20 |          DS |           69
+         2 |       null |   Chico Ace |        80.42
+         3 |       null |      Açores |       100.01
+
+(3 rows)
+
+cqlsh:cbd_tutorial> DELETE FROM player
+                ... WHERE player_id = 3;
+
+cqlsh:cbd_tutorial> SELECT * FROM player;
+
+ player_id | player_age | player_name | player_score
+-----------+------------+-------------+--------------
+         1 |         20 |          DS |           69
+         2 |       null |   Chico Ace |        80.42
+
+(2 rows)
+
+cqlsh:cbd_tutorial> SELECT * FROM player;
+
+ player_id | player_age | player_name | player_score
+-----------+------------+-------------+--------------
+         1 |         20 |          DS |           69
+         2 |       null |   Chico Ace |         null
+
+(2 rows)
+cqlsh:cbd_tutorial> SELECT player_name FROM player;
+
+ player_name
+-------------
+          DS
+   Chico Ace
+
+(2 rows)
+
+cqlsh:cbd_tutorial> SELECT player_name FROM player
+                ... LIMIT 1;
+
+ player_name
+-------------
+          DS
+
+(1 rows)
+
+cqlsh:cbd_tutorial> SELECT player_name FROM player 
+                ... WHERE player_id = 2;
+
+ player_name
+-------------
+   Chico Ace
+
+(1 rows)
+
+cqlsh:cbd_tutorial> SELECT player_name FROM player  WHERE player_age > 10;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
+
+cqlsh:cbd_tutorial> SELECT player_name FROM player  WHERE player_age > 10 ALLOW FILTERING;
+
+ player_name
+-------------
+          DS
+
+(1 rows)
+
+cqlsh:cbd_tutorial> SELECT player_name FROM player  ORDER BY player_id DESC;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."

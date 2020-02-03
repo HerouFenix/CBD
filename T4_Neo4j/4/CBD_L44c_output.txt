@@ -1,0 +1,92 @@
+Query 1: Get all Pokemon Types in the database
+  MATCH (n:Type) RETURN n
+  <Node id=1634 labels={'Type'} properties={'type': 'Grass'}>
+  <Node id=1635 labels={'Type'} properties={'type': 'Fire'}>
+  <Node id=1636 labels={'Type'} properties={'type': 'Water'}>
+  <Node id=1637 labels={'Type'} properties={'type': 'Bug'}>
+  <Node id=1638 labels={'Type'} properties={'type': 'Normal'}>
+  <Node id=1639 labels={'Type'} properties={'type': 'Poison'}>
+  <Node id=1640 labels={'Type'} properties={'type': 'Electric'}>
+  <Node id=1641 labels={'Type'} properties={'type': 'Ground'}>
+  <Node id=1644 labels={'Type'} properties={'type': 'Fairy'}>
+  <Node id=1645 labels={'Type'} properties={'type': 'Fighting'}>
+  <Node id=1646 labels={'Type'} properties={'type': 'Psychic'}>
+  <Node id=1647 labels={'Type'} properties={'type': 'Rock'}>
+  <Node id=1648 labels={'Type'} properties={'type': 'Ghost'}>
+  <Node id=1649 labels={'Type'} properties={'type': 'Ice'}>
+  <Node id=1650 labels={'Type'} properties={'type': 'Dragon'}>
+  <Node id=1651 labels={'Type'} properties={'type': 'Dark'}>
+  <Node id=1652 labels={'Type'} properties={'type': 'Steel'}>
+  <Node id=1653 labels={'Type'} properties={'type': 'Flying'}>
+
+
+Query 2: Get all Dragon Type Pokemons from the first generation that have over 80 attack
+  MATCH(poke:Pokemon)-[:Type]->(:Type {type:"Dragon"}) MATCH(poke)-[:GEN]->(:Generation {number:"1"}) WHERE toInt(poke.attack) > 80 return poke
+  <Node id=956 labels={'Pokemon'} properties={'number': '148', 'total': '420', 'defense': '65', 'attack': '84', 'hp': '61', 'name': 'Dragonair', 'speed': '70'}>
+  <Node id=957 labels={'Pokemon'} properties={'number': '149', 'total': '600', 'defense': '95', 'attack': '134', 'hp': '91', 'name': 'Dragonite', 'speed': '80'}>
+  <Node id=803 labels={'Pokemon'} properties={'number': '6', 'total': '634', 'defense': '111', 'attack': '130', 'hp': '78', 'name': 'CharizardMega Charizard X', 'speed': '100'}>
+
+
+Query 3: Get the Steel Pokemon with the Highest HP
+  MATCH(poke:Pokemon)-[:Type]->(:Type {type:"Steel"}) RETURN poke ORDER BY poke.HP DESC LIMIT 1
+  <Node id=1208 labels={'Pokemon'} properties={'number': '376', 'total': '600', 'defense': '130', 'attack': '135', 'hp': '80', 'name': 'Metagross', 'speed': '70'}>
+
+
+Query 4: Get the 3 Pokemon with the lowest speed
+  MATCH(poke:Pokemon) RETURN poke ORDER BY poke.speed LIMIT 3
+  <Node id=1155 labels={'Pokemon'} properties={'number': '328', 'total': '290', 'defense': '45', 'attack': '100', 'hp': '45', 'name': 'Trapinch', 'speed': '10'}>
+  <Node id=1454 labels={'Pokemon'} properties={'number': '597', 'total': '305', 'defense': '91', 'attack': '50', 'hp': '44', 'name': 'Ferroseed', 'speed': '10'}>
+  <Node id=1282 labels={'Pokemon'} properties={'number': '438', 'total': '290', 'defense': '95', 'attack': '80', 'hp': '50', 'name': 'Bonsly', 'speed': '10'}>
+
+
+Query 5: Get all Psychich type Pokemon from the 5th Generation that are also Fire type
+  MATCH(poke:Pokemon)-[:Type]->(:Type {type:"Psychic"}) MATCH(poke)-[:Type]->(:Type{type:"Fire"}) MATCH(poke)-[:GEN]->(:Generation{number:"5"}) return poke
+  <Node id=1349 labels={'Pokemon'} properties={'number': '494', 'total': '600', 'defense': '100', 'attack': '100', 'hp': '100', 'name': 'Victini', 'speed': '100'}>
+  <Node id=1412 labels={'Pokemon'} properties={'number': '555', 'total': '540', 'defense': '105', 'attack': '30', 'hp': '105', 'name': 'DarmanitanZen Mode', 'speed': '55'}>
+
+
+Query 6: Get all Pokemons immune to Ghost Type
+  MATCH(immune:Type)-[:IMMUNE_AGAINST]->(attacker:Type{type:"Ghost"}) return immune
+  <Node id=1638 labels={'Type'} properties={'type': 'Normal'}>
+
+
+Query 7: Get all Pokemons that Lucario is Strong Against
+  MATCH(lucario:Pokemon{name:"Lucario"})-[:Type]->(lucario_types:Type) MATCH(lucario_types:Type)-[:STRONG_AGAINST]->(types:Type) RETURN types
+  <Node id=1647 labels={'Type'} properties={'type': 'Rock'}>
+  <Node id=1649 labels={'Type'} properties={'type': 'Ice'}>
+  <Node id=1652 labels={'Type'} properties={'type': 'Steel'}>
+  <Node id=1647 labels={'Type'} properties={'type': 'Rock'}>
+  <Node id=1638 labels={'Type'} properties={'type': 'Normal'}>
+  <Node id=1649 labels={'Type'} properties={'type': 'Ice'}>
+  <Node id=1651 labels={'Type'} properties={'type': 'Dark'}>
+
+
+Query 8: Get how many Pokemons that Gyarados is weak against
+  MATCH(gyarados:Pokemon{name:"Gyarados"})-[:Type]->(gyarados_type:Type) MATCH(gyarados_type:Type)-[:WEAK_AGAINST]->(types:Type) MATCH(pokemon:Pokemon)-[:Type]->(types) WITH COUNT(pokemon) AS counter RETURN counter
+  428
+
+
+Query 9: List all Fighting Type Pokemon that are Weak against Water
+  MATCH(pokemon:Pokemon)-[:Type]->(:Type{type:"Fighting"}) MATCH(pokemon)-[:Type]->(types:Type) MATCH(types)-[:WEAK_AGAINST]->(:Type{type:"Water"}) RETURN pokemon
+  <Node id=1354 labels={'Pokemon'} properties={'number': '499', 'total': '418', 'defense': '55', 'attack': '93', 'hp': '90', 'name': 'Pignite', 'speed': '55'}>
+  <Node id=1073 labels={'Pokemon'} properties={'number': '256', 'total': '405', 'defense': '60', 'attack': '85', 'hp': '60', 'name': 'Combusken', 'speed': '55'}>
+  <Node id=1293 labels={'Pokemon'} properties={'number': '448', 'total': '525', 'defense': '70', 'attack': '110', 'hp': '70', 'name': 'Lucario', 'speed': '90'}>
+  <Node id=1294 labels={'Pokemon'} properties={'number': '448', 'total': '625', 'defense': '88', 'attack': '145', 'hp': '70', 'name': 'LucarioMega Lucario', 'speed': '112'}>
+  <Node id=863 labels={'Pokemon'} properties={'number': '62', 'total': '510', 'defense': '95', 'attack': '95', 'hp': '90', 'name': 'Poliwrath', 'speed': '70'}>
+  <Node id=1355 labels={'Pokemon'} properties={'number': '500', 'total': '528', 'defense': '65', 'attack': '123', 'hp': '110', 'name': 'Emboar', 'speed': '65'}>
+  <Node id=1232 labels={'Pokemon'} properties={'number': '391', 'total': '405', 'defense': '52', 'attack': '78', 'hp': '64', 'name': 'Monferno', 'speed': '81'}>
+  <Node id=1075 labels={'Pokemon'} properties={'number': '257', 'total': '630', 'defense': '80', 'attack': '160', 'hp': '80', 'name': 'BlazikenMega Blaziken', 'speed': '100'}>
+  <Node id=1074 labels={'Pokemon'} properties={'number': '257', 'total': '530', 'defense': '70', 'attack': '120', 'hp': '80', 'name': 'Blaziken', 'speed': '80'}>
+  <Node id=1233 labels={'Pokemon'} properties={'number': '392', 'total': '534', 'defense': '71', 'attack': '104', 'hp': '76', 'name': 'Infernape', 'speed': '108'}>
+  <Node id=1495 labels={'Pokemon'} properties={'number': '638', 'total': '580', 'defense': '129', 'attack': '90', 'hp': '91', 'name': 'Cobalion', 'speed': '108'}>
+  <Node id=1510 labels={'Pokemon'} properties={'number': '647', 'total': '580', 'defense': '90', 'attack': '72', 'hp': '91', 'name': 'KeldeoResolute Forme', 'speed': '108'}>
+  <Node id=1509 labels={'Pokemon'} properties={'number': '647', 'total': '580', 'defense': '90', 'attack': '72', 'hp': '91', 'name': 'KeldeoOrdinary Forme', 'speed': '108'}>
+
+
+Query 10: List all Pokemon whose name ends with "chu"
+  MATCH(pokemon:Pokemon) WHERE(pokemon.name ENDS WITH 'chu') RETURN pokemon
+  <Node id=826 labels={'Pokemon'} properties={'number': '25', 'total': '320', 'defense': '40', 'attack': '55', 'hp': '35', 'name': 'Pikachu', 'speed': '90'}>
+  <Node id=827 labels={'Pokemon'} properties={'number': '26', 'total': '485', 'defense': '55', 'attack': '90', 'hp': '60', 'name': 'Raichu', 'speed': '110'}>
+  <Node id=982 labels={'Pokemon'} properties={'number': '172', 'total': '205', 'defense': '15', 'attack': '40', 'hp': '20', 'name': 'Pichu', 'speed': '60'}>
+
+

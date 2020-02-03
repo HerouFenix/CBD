@@ -1,0 +1,19 @@
+{"user_email": "user10@bot.com", "video_id": 10, "real_timestamp": "2020-02-03 13:20:56.254Z", "video_timestamp": 300, "action": "Stop"}
+  {"user_email": "user10@bot.com", "video_id": 10, "real_timestamp": "2020-02-03 13:20:48.760Z", "video_timestamp": 242, "action": "Play"}
+ {"user_email": "user10@bot.com", "video_id": 10, "real_timestamp": "2020-02-03 13:20:43.892Z", "video_timestamp": 242, "action": "Pause"}
+  {"user_email": "user10@bot.com", "video_id": 10, "real_timestamp": "2020-02-03 13:20:36.894Z", "video_timestamp": 124, "action": "Play"}
+ {"user_email": "user10@bot.com", "video_id": 10, "real_timestamp": "2020-02-03 13:20:32.319Z", "video_timestamp": 124, "action": "Pause"}
+    {"user_email": "user10@bot.com", "video_id": 10, "real_timestamp": "2020-02-03 13:20:27.386Z", "video_timestamp": 0, "action": "Play"}
+    {"user_email": "user4@bot.com", "video_id": 11, "real_timestamp": "2020-02-03 13:19:20.357Z", "video_timestamp": 20, "action": "Stop"}
+     {"user_email": "user4@bot.com", "video_id": 11, "real_timestamp": "2020-02-03 13:19:14.334Z", "video_timestamp": 0, "action": "Play"}
+    {"user_email": "user2@bot.com", "video_id": 1, "real_timestamp": "2020-02-03 13:19:04.082Z", "video_timestamp": 120, "action": "Stop"}
+     {"user_email": "user2@bot.com", "video_id": 1, "real_timestamp": "2020-02-03 13:18:58.061Z", "video_timestamp": 98, "action": "Play"}
+    {"user_email": "user2@bot.com", "video_id": 1, "real_timestamp": "2020-02-03 13:18:54.945Z", "video_timestamp": 98, "action": "Pause"}
+      {"user_email": "user2@bot.com", "video_id": 1, "real_timestamp": "2020-02-03 13:18:44.942Z", "video_timestamp": 0, "action": "Play"}
+     {"user_email": "user6@bot.com", "video_id": 11, "real_timestamp": "2020-02-03 13:19:31.173Z", "video_timestamp": 0, "action": "Stop"}
+     {"user_email": "user6@bot.com", "video_id": 11, "real_timestamp": "2020-02-03 13:19:27.323Z", "video_timestamp": 0, "action": "Play"}
+    {"user_email": "user9@bot.com", "video_id": 11, "real_timestamp": "2020-02-03 13:19:47.608Z", "video_timestamp": 20, "action": "Stop"}
+     {"user_email": "user9@bot.com", "video_id": 11, "real_timestamp": "2020-02-03 13:19:38.267Z", "video_timestamp": 0, "action": "Play"}
+    {"user_email": "user4@bot.com", "video_id": 5, "real_timestamp": "2020-02-03 13:20:14.789Z", "video_timestamp": 150, "action": "Stop"}
+   {"user_email": "user4@bot.com", "video_id": 5, "real_timestamp": "2020-02-03 13:20:09.563Z", "video_timestamp": 150, "action": "Pause"}
+     {"user_email": "user4@bot.com", "video_id": 5, "real_timestamp": "2020-02-03 13:20:00.224Z", "video_timestamp": 51, "action": "Play"}

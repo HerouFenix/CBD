@@ -1,0 +1,43 @@
+#A. Pesquisa de todos os vídeos de determinado autor (e.x todos os videos do user DS)
+
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Videos_per_author WHERE user_email = 'ds@test.com';
+
+ user_email  | upload_timestamp                | video_id | author
+-------------+---------------------------------+----------+---------
+ ds@test.com | 2020-02-03 12:25:56.000000+0000 |        1 | FenixDS
+ ds@test.com | 2020-02-03 12:26:41.000000+0000 |       11 | FenixDS
+
+(2 rows)
+
+
+#B. Pesquisa de comentários por utilizador, ordenado inversamente pela data (ex. user Bot4)
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Comments_per_username WHERE user_username = 'Bot4';
+
+ user_username | upload_timestamp                | comment               | user_email    | video_id
+---------------+---------------------------------+-----------------------+---------------+----------
+          Bot4 | 2020-02-03 13:09:55.278000+0000 |               Goodbye | user4@bot.com |       11
+          Bot4 | 2020-02-03 13:09:21.564000+0000 | Good Video Fellow Bot | user4@bot.com |        2
+
+(2 rows)
+
+
+#C. Pesquisa de comentários por vídeos, ordenado inversamente pela data (ex. Zoo Video - id = 1)
+cqlsh:cbd_video_sharing_melhor> SELECT * FROM Comments_per_video WHERE video_id = 1;
+
+ video_id | upload_timestamp                | comment           | user_email    | user_username
+----------+---------------------------------+-------------------+---------------+---------------
+        1 | 2020-02-03 13:09:11.493000+0000 | Automated Comment | user3@bot.com |          Bot3
+        1 | 2020-02-03 13:09:06.329000+0000 | Automated Comment | user2@bot.com |          Bot2
+        1 | 2020-02-03 13:09:01.983000+0000 | Automated Comment | user1@bot.com |          Bot1
+
+(3 rows)
+
+
+#D. Pesquisa do rating médio de um vídeo e quantas vezes foi votado; (ex. video  The End - id = 11)
+cqlsh:cbd_video_sharing_melhor> SELECT avg(value) as Average, count(value) as NoReviews FROM Ratings_per_video WHERE video_id = 11;
+
+ average | noreviews
+---------+-----------
+       2 |         8
+
+(1 rows)

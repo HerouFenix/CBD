@@ -1,0 +1,103 @@
+//a)
+// Nesta BD vamos ter dois tipos de entidades:
+//  User - svn_id, real_name, organization
+//  Project - name
+// E as seguintes relações:
+//  Commited [User->Project] - num, role_on_project
+
+//b)
+// Para inserir os dados na BD basta seguir os seguintes passos:
+//  1. Criar um Novo Projeto e Base de Dados
+//  2. Clicar no botão "Manage" na secção Base de Dados
+//  3. CLicar em "Open Folder"
+//  4. Copiar o ficheiro git_selection.csv para a pasta "import"
+//  5. Começar a base de dados (clicando em Start)
+//  6. Ligar o Neo4j Browser
+//  7. Criar as seguintes constraints (para evitar que os nodes não sejam duplicados quando aparecerem multiplas vezes no ficheiro):
+//      7.1 CREATE CONSTRAINT ON (project:Project) ASSERT project.project_name IS UNIQUE
+//      7.2 CREATE CONSTRAINT ON (user:Member) ASSERT user.svn_id IS UNIQUE
+//  8. Utilizar a seguinte Cypher Query para inserir os nodes:
+//      LOAD CSV WITH HEADERS
+//      FROM "file:///git_selection.csv" AS Row
+//      MERGE (user:Member {svn_id: Row.svn_id})
+//      SET user.real_name=Row.real_name, user.organization=Row.organization
+//      MERGE (project:Project {project_name: Row.project_name})
+//  9. Utilizar a seguinte Cypher Query para inserir as relações:
+//      LOAD CSV WITH HEADERS
+//      FROM "file:///git_selection.csv" AS Row
+//      MATCH (user:Member {svn_id: Row.svn_id}),(project:Project {project_name:Row.project_name})
+//      CREATE (user)-[:COMMITED {num: Row.num, role_on_project: Row.role_on_project}]->(project)
+
+//c)
+#1
+// Liste a informação de cada utilizador.
+
+MATCH (user:Member)
+RETURN user
+
+
+#2
+// Liste o nome de cada utilizador.
+
+MATCH (user:Member)
+RETURN user.real_name
+
+
+#3
+// Liste a informação de cada projeto, no qual tenha participado pelo menos
+um utilizador.
+
+MATCH ()-[r:COMMITED]->(project:Project)
+WITH project, count(r) as rel_counter
+WHERE rel_counter >= 1
+RETURN project
+
+
+#4
+// Liste os utilizadores e total de projetos em que cada um colabora.
+
+MATCH (user:Member)-[r:COMMITED]->()
+WITH user, count(r) as rel_counter
+RETURN user,rel_counter
+
+
+#5
+// Liste os utilizadores e do total de projetos em que cada colabora ordenados
+por ordem decrescente do total.
+
+MATCH (user:Member)-[r:COMMITED]->()
+WITH user, count(r) as rel_counter
+RETURN user,rel_counter
+ORDER BY rel_counter DESC
+
+
+#6
+// Liste projetos e total de membros em cada projeto.
+
+MATCH ()-[r:COMMITED]->(project:Project)
+WITH project, count(r) as rel_counter
+RETURN project, rel_counter
+
+
+#7
+// Liste projetos e total de membros com a role "Committer" em cada projeto.
+
+MATCH ()-[r:COMMITED]->(project:Project)
+WITH project, count(r.role_on_project = "Committer") as rel_counter
+RETURN project, rel_counter
+
+#8
+// Liste todos os utilizadores que participaram nos mesmo projetos do que o
+utilizador "atm" (id). Mostre os atributos: nome de "atm", nome utilizador
+2, nome do projeto.
+
+MATCH (atm:Member {svn_id:"atm"})-[:COMMITED]->(project:Project)<-[:COMMITED]-(user:Member)
+RETURN atm.real_name, user.real_name, project.project_name
+
+
+#9
+// Liste todos os utilizadores que participaram com a role "Committer" em
+projetos em que o utilizador "atm" (id1) participou com a role "PMC".
+
+MATCH (atm:Member {svn_id:"atm"})-[:COMMITED {role_on_project: "PMC"}]->(project:Project)<-[:COMMITED {role_on_project: "Committer"}]-(user:Member)
+RETURN user
